@@ -96,6 +96,12 @@
 
     <div class="auth-divider">or</div>
 
+    <button class="btn btn-outline btn-full btn-lg" onclick="demoLogin()" style="border:1.5px dashed #c8d0dc;">
+      🎓 Try Demo — no account needed
+    </button>
+
+    <div class="auth-divider">or</div>
+
     <p class="auth-footer-link">
       Don't have an account? <a href="./signup.html">Create one free.</a>
     </p>
@@ -126,6 +132,35 @@ function clearFieldErr(inputId, errId) {
   document.getElementById(inputId).classList.remove('error');
   document.getElementById(errId).classList.remove('show');
   document.getElementById('alertBox').classList.remove('show');
+}
+
+function demoLogin() {
+  // Set John Doe's profile
+  localStorage.setItem('cp_user_name', 'John');
+  localStorage.setItem('cp_logged_in', '1');
+
+  // Load John's original assignments — 8 active, 4 completed, 2 due this week
+  const today = new Date();
+  const d = o => { const x=new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  localStorage.setItem('cp_assignments', JSON.stringify([
+    {id:1,  title:'Research Paper',         course:'psych', dueDate:d(5),  reminder:'2', priority:'high',   estHours:'4', notes:'Manifest Destiny – 8 pages',  completed:false, createdAt:d(-10)},
+    {id:2,  title:'Group Project',          course:'cs',    dueDate:d(3),  reminder:'2', priority:'high',   estHours:'6', notes:'HCI prototype demo',           completed:false, createdAt:d(-10)},
+    {id:3,  title:'Lab Report',             course:'cs',    dueDate:d(-3), reminder:'2', priority:'medium', estHours:'2', notes:'',                             completed:true,  createdAt:d(-14)},
+    {id:4,  title:'Coding Project',         course:'prog',  dueDate:d(11), reminder:'3', priority:'medium', estHours:'5', notes:'Nested loops chapter',          completed:false, createdAt:d(-5)},
+    {id:5,  title:'CS Midterm',             course:'cs',    dueDate:d(17), reminder:'7', priority:'high',   estHours:'8', notes:'Study chapters 1–6',            completed:false, createdAt:d(-5)},
+    {id:6,  title:'Discrete HW',            course:'math',  dueDate:d(19), reminder:'2', priority:'low',    estHours:'2', notes:'Problem set 4',                 completed:false, createdAt:d(-4)},
+    {id:7,  title:'Psychology Quiz',        course:'psych', dueDate:d(12), reminder:'1', priority:'medium', estHours:'1', notes:'',                             completed:false, createdAt:d(-4)},
+    {id:8,  title:'Programming Assignment', course:'prog',  dueDate:d(21), reminder:'2', priority:'medium', estHours:'3', notes:'Recursion exercises',           completed:false, createdAt:d(-3)},
+    {id:9,  title:'Data Structures Quiz',   course:'cs',    dueDate:d(8),  reminder:'2', priority:'medium', estHours:'2', notes:'',                             completed:false, createdAt:d(-2)},
+    {id:10, title:'Calculus HW',            course:'math',  dueDate:d(-7), reminder:'2', priority:'low',    estHours:'1', notes:'',                             completed:true,  createdAt:d(-14)},
+    {id:11, title:'CS Project Proposal',    course:'cs',    dueDate:d(-14),reminder:'2', priority:'medium', estHours:'3', notes:'',                             completed:true,  createdAt:d(-21)},
+    {id:12, title:'Psychology Paper Draft', course:'psych', dueDate:d(-10),reminder:'2', priority:'high',   estHours:'4', notes:'',                             completed:true,  createdAt:d(-18)},
+  ]));
+
+  const t = document.getElementById('toast');
+  t.textContent = '🎓 Loading demo…';
+  t.classList.add('show');
+  setTimeout(() => window.location.href = './dashboard.html', 900);
 }
 
 function signIn() {
