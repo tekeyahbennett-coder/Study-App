@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusPlanner – Create Account</title>
+<link rel="stylesheet" href="./main.css">
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .form-row { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
+</style>
+</head>
+<body class="auth-body">
+<div class="auth-card">
+  <div class="auth-logo">
+    <div class="logo-icon">📚</div>
+    <span>CampusPlanner</span>
+  </div>
+  <h1 class="auth-title">Create an account</h1>
+  <p class="auth-sub">Start organising your academic life for free</p>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">Full name</label>
+      <input id="name" class="form-input" type="text" placeholder="Jane Doe">
+      <span class="form-error" id="nameErr">Please enter your name.</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">University email</label>
+      <input id="email" class="form-input" type="email" placeholder="you@university.edu">
+      <span class="form-error" id="emailErr">Please enter your email.</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input id="password" class="form-input" type="password" placeholder="••••••••">
+      <span class="form-error" id="passErr">Please enter a password.</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm password</label>
+      <input id="confirm" class="form-input" type="password" placeholder="••••••••">
+      <span class="form-error" id="confirmErr">Passwords do not match.</span>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-full" onclick="createAccount()">Create account →</button>
+  <p class="auth-footer">Already have an account? <a href="./index.html">Sign in.</a></p>
+</div>
+
+<div class="toast success" id="toast">✅ Account created! Redirecting…</div>
+
+<script>
+function createAccount() {
+  const name    = document.getElementById('name').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const pass    = document.getElementById('password').value;
+  const confirm = document.getElementById('confirm').value;
+  const ids = ['name','email','password','confirm'];
+  const errs = ['nameErr','emailErr','passErr','confirmErr'];
+  ids.forEach(i => { document.getElementById(i).classList.remove('error'); });
+  errs.forEach(i => { document.getElementById(i).classList.remove('show'); });
+  let ok = true;
+  if (!name)  { flag('name','nameErr'); ok=false; }
+  if (!email) { flag('email','emailErr'); ok=false; }
+  if (!pass)  { flag('password','passErr'); ok=false; }
+  if (pass !== confirm) { flag('confirm','confirmErr'); ok=false; }
+  if (!ok) return;
+  seedData();
+  localStorage.setItem('cp_user_name', name.split(' ')[0]);
+  showToast();
+  setTimeout(() => window.location.href = './dashboard.html', 900);
+}
+function flag(inputId, errId) {
+  document.getElementById(inputId).classList.add('error');
+  document.getElementById(errId).classList.add('show');
+}
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function seedData() {
+  if (JSON.parse(localStorage.getItem('cp_assignments') || '[]').length > 0) return;
+  const today = new Date();
+  const d = (offset) => { const x = new Date(today); x.setDate(x.getDate()+offset); return x.toISOString().split('T')[0]; };
+  const seed = [
+    { id:1, title:'Research Paper',        course:'psych', dueDate:d(6),  reminder:'2', notes:'', completed:false, createdAt:d(-5) },
+    { id:2, title:'Group Project',         course:'cs',    dueDate:d(4),  reminder:'2', notes:'', completed:false, createdAt:d(-5) },
+    { id:3, title:'Lab Report',            course:'cs',    dueDate:d(-3), reminder:'2', notes:'', completed:true,  createdAt:d(-8) },
+    { id:4, title:'Coding Project',        course:'prog',  dueDate:d(12), reminder:'3', notes:'', completed:false, createdAt:d(-2) },
+    { id:5, title:'CS Midterm',            course:'cs',    dueDate:d(18), reminder:'7', notes:'', completed:false, createdAt:d(-2) },
+    { id:6, title:'Discrete HW',           course:'math',  dueDate:d(20), reminder:'2', notes:'', completed:false, createdAt:d(-1) },
+  ];
+  localStorage.setItem('cp_assignments', JSON.stringify(seed));
+}
+</script>
+</body>
+</html>

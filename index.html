@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusPlanner – Dashboard</title>
+<link rel="stylesheet" href="./main.css">
+<style>
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.stat-card {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 20px 22px;
+  display: flex; align-items: center; gap: 16px;
+}
+.stat-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.stat-num  { font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-lbl  { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+.content-row {
+  display: grid; grid-template-columns: 1fr 320px; gap: 20px;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px 0;
+}
+.section-title { font-size: 15px; font-weight: 700; }
+.assignment-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .12s;
+}
+.assignment-item:last-child { border-bottom: none; }
+.assignment-item:hover { background: var(--bg); }
+.check-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s;
+}
+.check-circle:hover { border-color: var(--primary); }
+.check-circle.done { background: var(--math); border-color: var(--math); }
+.check-circle.done::after { content:'✓'; color:#fff; font-size:11px; font-weight:700; }
+.a-title { font-size: 14px; font-weight: 600; }
+.a-title.done { text-decoration: line-through; color: var(--text-muted); }
+.a-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.due-soon { color: #ef4444 !important; font-weight: 600; }
+.sched-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 22px; border-bottom: 1px solid var(--border);
+}
+.sched-item:last-child { border-bottom: none; }
+.sched-time { font-size: 11px; color: var(--text-muted); font-weight: 600; min-width: 50px; padding-top: 2px; }
+.sched-bar  { width: 3px; border-radius: 99px; min-height: 36px; flex-shrink: 0; }
+.sched-title { font-size: 13px; font-weight: 600; }
+.sched-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-muted); font-size: 14px;
+}
+.empty-icon { font-size: 32px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">📚</div>
+    <span>CampusPlanner</span>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Navigation</div>
+    <a class="nav-item active" href="./dashboard.html"><span class="ni">🏠</span> Dashboard</a>
+    <a class="nav-item" href="./calendar.html"><span class="ni">📅</span> Calendar</a>
+    <a class="nav-item" href="./addAssignment.html"><span class="ni">➕</span> Add Assignment</a>
+    <a class="nav-item" href="./notifications.html"><span class="ni">🔔</span> Notifications</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Courses</div>
+    <a class="nav-item" href="./course.html?course=cs"><span class="course-dot" style="background:var(--cs)"></span> Computer Science</a>
+    <a class="nav-item" href="./course.html?course=prog"><span class="course-dot" style="background:var(--prog)"></span> Programming</a>
+    <a class="nav-item" href="./course.html?course=psych"><span class="course-dot" style="background:var(--psych)"></span> Psychology</a>
+    <a class="nav-item" href="./course.html?course=math"><span class="course-dot" style="background:var(--math)"></span> Discrete Math</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="profile-block">
+      <div class="avatar" id="avatarEl">JD</div>
+      <div>
+        <div class="profile-name" id="profileName">John Doe</div>
+        <div class="profile-sub">Junior • CS Major</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" id="greeting">Good morning, John 👋</h1>
+      <p class="page-sub" id="dateLabel"></p>
+    </div>
+    <a class="btn btn-primary" href="./addAssignment.html">+ Add Assignment</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#eef2ff;">📝</div>
+      <div><div class="stat-num" id="statActive">0</div><div class="stat-lbl">Active Tasks</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef3c7;">⏰</div>
+      <div><div class="stat-num" id="statWeek">0</div><div class="stat-lbl">Due This Week</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ecfdf5;">✅</div>
+      <div><div class="stat-num" id="statDone">0</div><div class="stat-lbl">Completed</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f0f9ff;">📖</div>
+      <div><div class="stat-num">4</div><div class="stat-lbl">Courses</div></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-row">
+    <div class="card">
+      <div class="section-header">
+        <span class="section-title">Upcoming Assignments</span>
+        <a class="btn btn-outline btn-sm" href="./calendar.html">View Calendar</a>
+      </div>
+      <div id="assignmentList" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <span class="section-title">Today's Schedule</span>
+      </div>
+      <div id="scheduleList" style="margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COURSES = {
+  cs:    { name:'Computer Science', color:'#6366f1', soft:'#eef2ff' },
+  prog:  { name:'Programming',      color:'#ef4444', soft:'#fef2f2' },
+  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb' },
+  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5' },
+};
+
+function getAssignments() {
+  return JSON.parse(localStorage.getItem('cp_assignments') || '[]');
+}
+function saveAssignments(arr) {
+  localStorage.setItem('cp_assignments', JSON.stringify(arr));
+}
+
+function init() {
+  // Greeting
+  const h = new Date().getHours();
+  const grt = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const name = localStorage.getItem('cp_user_name') || 'John';
+  document.getElementById('greeting').textContent = `${grt}, ${name} 👋`;
+
+  // Date
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('dateLabel').textContent = now.toLocaleDateString('en-US', opts);
+
+  const all = getAssignments();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+
+  const active = all.filter(a => !a.completed);
+  const doneArr = all.filter(a => a.completed);
+  const dueWeek = active.filter(a => { const d = new Date(a.dueDate); return d >= today && d <= weekEnd; });
+
+  document.getElementById('statActive').textContent = active.length;
+  document.getElementById('statWeek').textContent   = dueWeek.length;
+  document.getElementById('statDone').textContent   = doneArr.length;
+  document.getElementById('dateLabel').textContent += ` • You have ${dueWeek.length} assignment${dueWeek.length!==1?'s':''} due this week`;
+
+  // Upcoming list – sort by due date
+  const upcoming = [...active].sort((a,b) => new Date(a.dueDate)-new Date(b.dueDate)).slice(0,6);
+  const listEl = document.getElementById('assignmentList');
+  if (upcoming.length === 0) {
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div>No upcoming assignments!</div>`;
+  } else {
+    listEl.innerHTML = upcoming.map(a => {
+      const c = COURSES[a.course] || {};
+      const due = new Date(a.dueDate);
+      const diff = Math.ceil((due - today) / 86400000);
+      const dueStr = diff === 0 ? 'Due today' : diff === 1 ? 'Due tomorrow' : diff < 0 ? 'Overdue' : `Due in ${diff} days`;
+      const dueCls = diff <= 2 ? 'due-soon' : '';
+      return `<div class="assignment-item">
+        <div class="check-circle${a.completed?' done':''}" onclick="toggleDone(${a.id}, this)"></div>
+        <div style="flex:1">
+          <div class="a-title${a.completed?' done':''}">${a.title}</div>
+          <div class="a-meta">
+            <span class="badge badge-${a.course}" style="font-size:11px">${c.name||a.course}</span>
+            <span class="${dueCls}" style="margin-left:8px;font-size:12px;">${dueStr}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Schedule – show due-today and due-soon items as schedule
+  const schedEl = document.getElementById('scheduleList');
+  const schedItems = [...active]
+    .filter(a => { const d = new Date(a.dueDate); const diff = Math.ceil((d-today)/86400000); return diff >= 0 && diff <= 3; })
+    .sort((a,b) => new Date(a.dueDate)-new Date(b.dueDate))
+    .slice(0,4);
+
+  if (schedItems.length === 0) {
+    schedEl.innerHTML = `<div class="empty-state"><div class="empty-icon">☀️</div>Nothing urgent today!</div>`;
+  } else {
+    schedEl.innerHTML = schedItems.map(a => {
+      const c = COURSES[a.course] || {};
+      const due = new Date(a.dueDate);
+      const diff = Math.ceil((due - today) / 86400000);
+      const label = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `In ${diff}d`;
+      return `<div class="sched-item">
+        <div class="sched-time">${label}</div>
+        <div class="sched-bar" style="background:${c.color||'#6366f1'}"></div>
+        <div>
+          <div class="sched-title">${a.title}</div>
+          <div class="sched-sub">${c.name||a.course}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleDone(id, el) {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === id);
+  if (!a) return;
+  a.completed = !a.completed;
+  saveAssignments(arr);
+  init();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusPlanner – Calendar</title>
+<link rel="stylesheet" href="./main.css">
+<style>
+.cal-wrapper { display: flex; flex-direction: column; gap: 16px; flex: 1; min-height: 0; }
+.cal-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.cal-nav { display: flex; align-items: center; gap: 12px; }
+.cal-month-label { font-size: 18px; font-weight: 700; min-width: 160px; text-align: center; }
+.cal-arrow {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; color: var(--text-muted);
+  transition: background .12s;
+}
+.cal-arrow:hover { background: var(--bg); color: var(--text); }
+.view-btns { display: flex; gap: 4px; }
+.view-btn {
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border); background: var(--card);
+  color: var(--text-muted); transition: all .12s;
+}
+.view-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.view-btn.disabled { opacity: .4; cursor: not-allowed; }
+
+/* Legend */
+.cal-legend {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* Grid */
+.cal-grid {
+  background: var(--card); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+}
+.cal-day-header {
+  padding: 10px; text-align: center;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text-muted);
+  background: var(--bg); border-bottom: 1px solid var(--border);
+}
+.cal-cell {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 8px; min-height: 90px;
+  vertical-align: top; position: relative;
+}
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell.other-month { background: #fafafa; }
+.cal-cell.other-month .cal-date { color: #c8d0d9; }
+.cal-cell.today { background: var(--primary-soft); }
+.cal-cell.today .cal-date {
+  background: var(--primary); color: #fff;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-date {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+.cal-event {
+  font-size: 11px; font-weight: 600; padding: 2px 6px;
+  border-radius: 4px; margin-bottom: 2px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  transition: filter .12s;
+}
+.cal-event:hover { filter: brightness(.92); }
+.cal-event.cs    { background: var(--cs-soft);    color: var(--cs);   }
+.cal-event.prog  { background: var(--prog-soft);  color: var(--prog); }
+.cal-event.psych { background: var(--psych-soft); color: #b45309;     }
+.cal-event.math  { background: var(--math-soft);  color: var(--math); }
+.cal-event.done  { background: var(--done-soft);  color: var(--done); text-decoration: line-through; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--card); border-radius: var(--radius);
+  padding: 28px; width: 100%; max-width: 400px;
+  box-shadow: var(--shadow-md);
+  transform: translateY(8px); transition: transform .2s;
+}
+.modal-overlay.show .modal { transform: translateY(0); }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+.modal-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 14px; }
+.modal-label { color: var(--text-muted); font-weight: 500; min-width: 90px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">📚</div>
+    <span>CampusPlanner</span>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Navigation</div>
+    <a class="nav-item" href="./dashboard.html"><span class="ni">🏠</span> Dashboard</a>
+    <a class="nav-item active" href="./calendar.html"><span class="ni">📅</span> Calendar</a>
+    <a class="nav-item" href="./addAssignment.html"><span class="ni">➕</span> Add Assignment</a>
+    <a class="nav-item" href="./notifications.html"><span class="ni">🔔</span> Notifications</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Courses</div>
+    <a class="nav-item" href="./course.html?course=cs"><span class="course-dot" style="background:var(--cs)"></span> Computer Science</a>
+    <a class="nav-item" href="./course.html?course=prog"><span class="course-dot" style="background:var(--prog)"></span> Programming</a>
+    <a class="nav-item" href="./course.html?course=psych"><span class="course-dot" style="background:var(--psych)"></span> Psychology</a>
+    <a class="nav-item" href="./course.html?course=math"><span class="course-dot" style="background:var(--math)"></span> Discrete Math</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="profile-block">
+      <div class="avatar">JD</div>
+      <div>
+        <div class="profile-name">John Doe</div>
+        <div class="profile-sub">Junior • CS Major</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main" style="gap:16px;">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Calendar 📅</h1>
+      <p class="page-sub">View and manage all your assignments by date</p>
+    </div>
+    <a class="btn btn-primary" href="./addAssignment.html">+ Add Assignment</a>
+  </div>
+
+  <div class="cal-wrapper">
+    <!-- Legend at top -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div class="cal-nav">
+        <div class="cal-arrow" onclick="changeMonth(-1)">&#8249;</div>
+        <div class="cal-month-label" id="monthLabel"></div>
+        <div class="cal-arrow" onclick="changeMonth(1)">&#8250;</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+        <div class="cal-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--cs)"></span>Computer Science</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--prog)"></span>Programming</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--psych)"></span>Psychology</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--math)"></span>Discrete Math</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--done)"></span>Completed</div>
+        </div>
+        <div class="view-btns">
+          <div class="view-btn active">Month</div>
+          <div class="view-btn disabled" title="Week view – coming soon">Week</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cal-grid" id="calGrid">
+      <div class="cal-day-header">Sun</div>
+      <div class="cal-day-header">Mon</div>
+      <div class="cal-day-header">Tue</div>
+      <div class="cal-day-header">Wed</div>
+      <div class="cal-day-header">Thu</div>
+      <div class="cal-day-header">Fri</div>
+      <div class="cal-day-header">Sat</div>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment detail modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-row"><span class="modal-label">Course</span><span id="modalCourse"></span></div>
+    <div class="modal-row"><span class="modal-label">Due Date</span><span id="modalDue"></span></div>
+    <div class="modal-row"><span class="modal-label">Priority</span><span id="modalPriority"></span></div>
+    <div class="modal-row" id="modalNotesRow"><span class="modal-label">Notes</span><span id="modalNotes"></span></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-sm" id="modalToggleBtn" onclick="toggleFromModal()">Mark Complete</button>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal').classList.remove('show')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COURSES = {
+  cs:    { name:'Computer Science', color:'#6366f1' },
+  prog:  { name:'Programming',      color:'#ef4444' },
+  psych: { name:'Psychology',       color:'#f59e0b' },
+  math:  { name:'Discrete Math',    color:'#10b981' },
+};
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+let currentYear  = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let activeId = null;
+
+function getAssignments() { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
+function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('monthLabel').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  const assignments = getAssignments();
+  const grid = document.getElementById('calGrid');
+
+  // Remove all cells (keep 7 headers)
+  while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  const firstDay    = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevDays    = new Date(currentYear, currentMonth, 0).getDate();
+  const today       = new Date(); today.setHours(0,0,0,0);
+
+  // Prev month cells
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell other-month';
+    cell.innerHTML = `<div class="cal-date">${prevDays - i}</div>`;
+    grid.appendChild(cell);
+  }
+
+  // Current month cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(currentYear, currentMonth, d);
+    cellDate.setHours(0,0,0,0);
+    const isToday = cellDate.getTime() === today.getTime();
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell' + (isToday ? ' today' : '');
+
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'cal-date';
+    dateDiv.textContent = d;
+    cell.appendChild(dateDiv);
+
+    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayAssignments = assignments.filter(a => a.dueDate === dateStr);
+
+    dayAssignments.forEach(a => {
+      const ev = document.createElement('div');
+      const cls = a.completed ? 'done' : (a.course || 'cs');
+      ev.className = `cal-event ${cls}`;
+      ev.textContent = a.title;
+      const c = COURSES[a.course] || {};
+      ev.title = `${a.title} – ${c.name||a.course} – Due ${formatDate(a.dueDate)}`;
+      ev.onclick = (e) => { e.stopPropagation(); openModal(a.id); };
+      cell.appendChild(ev);
+    });
+
+    grid.appendChild(cell);
+  }
+
+  // Next month filler
+  const total = firstDay + daysInMonth;
+  const remainder = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remainder; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell other-month';
+    cell.innerHTML = `<div class="cal-date">${i}</div>`;
+    grid.appendChild(cell);
+  }
+}
+
+function formatDate(str) {
+  const d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function openModal(id) {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === id);
+  if (!a) return;
+  activeId = id;
+  const c = COURSES[a.course] || {};
+  document.getElementById('modalTitle').textContent = a.title;
+  document.getElementById('modalCourse').innerHTML = `<span class="badge badge-${a.course}">${c.name||a.course}</span>`;
+  document.getElementById('modalDue').textContent = formatDate(a.dueDate);
+  document.getElementById('modalPriority').textContent = a.priority ? (a.priority.charAt(0).toUpperCase()+a.priority.slice(1)) : 'Medium';
+  document.getElementById('modalNotes').textContent = a.notes || '—';
+  document.getElementById('modalNotesRow').style.display = a.notes ? 'flex' : 'none';
+  const btn = document.getElementById('modalToggleBtn');
+  btn.textContent = a.completed ? 'Mark Incomplete' : 'Mark Complete';
+  btn.className = a.completed ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+  document.getElementById('modal').classList.add('show');
+}
+
+function toggleFromModal() {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === activeId);
+  if (!a) return;
+  a.completed = !a.completed;
+  saveAssignments(arr);
+  document.getElementById('modal').classList.remove('show');
+  renderCalendar();
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('show');
+  }
+}
+
+renderCalendar();
+</script>
+</body>
+</html>
