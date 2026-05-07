@@ -3,189 +3,296 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CampusPlanner – Reset Password</title>
+<title>CampusPlanner – Notifications</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-.form-stack { display:flex;flex-direction:column;gap:16px;margin-bottom:24px; }
-.steps { display:flex;align-items:center;margin-bottom:28px; }
-.step-item { display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#94a3b8; }
-.step-item.active { color:var(--primary); }
-.step-item.done   { color:#10b981; }
-.step-circle { width:26px;height:26px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#fff;flex-shrink:0; }
-.step-item.active .step-circle { border-color:var(--primary);color:var(--primary); }
-.step-item.done   .step-circle { border-color:#10b981;background:#10b981;color:#fff; }
-.step-line { flex:1;height:2px;background:#e2e8f0;margin:0 8px; }
-.step-line.done { background:#10b981; }
-.code-inputs { display:flex;gap:9px;justify-content:center;margin-bottom:6px; }
-.code-box { width:46px;height:52px;border:2px solid var(--border);border-radius:10px;text-align:center;font-size:22px;font-weight:700;font-family:'Inter',monospace;color:var(--text);background:var(--card);outline:none;transition:border .15s,box-shadow .15s; }
-.code-box:focus { border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,87,248,.12); }
-.code-box.error { border-color:var(--prog); }
-.demo-hint { background:#f0f9ff;border:1px solid #bae6fd;border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;color:#0369a1;margin-bottom:18px;text-align:center;line-height:1.8; }
-.demo-code { font-size:22px;font-weight:700;letter-spacing:.14em;color:var(--primary);display:block;margin-top:3px; }
-.strength-bar { height:4px;border-radius:99px;background:#e2e8f0;margin-top:7px;overflow:hidden; }
-.strength-fill { height:100%;border-radius:99px;transition:width .3s,background .3s;width:0%; }
-.strength-label { font-size:12px;margin-top:4px;font-weight:600; }
-.success-screen { text-align:center;padding:8px 0; }
-.success-icon { width:64px;height:64px;border-radius:50%;background:#ecfdf5;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px; }
-.success-title { font-size:22px;font-weight:700;margin-bottom:8px; }
-.success-sub   { font-size:14px;color:var(--text-muted);margin-bottom:28px;line-height:1.6; }
-.resend-row { text-align:center;margin-top:14px;font-size:13px;color:var(--text-muted); }
-.resend-btn { color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;font-size:13px;font-family:inherit; }
-.resend-btn:hover { text-decoration:underline; }
-.ce-row { font-size:12px;color:var(--prog);margin-bottom:10px;display:none;text-align:center; }
-.ce-row.show { display:block; }
+.tab-bar { display:flex;gap:3px;background:var(--bg);border-radius:var(--radius-sm);padding:3px;border:1.5px solid var(--border); }
+.tab { padding:6px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:all .12s;font-family:inherit;white-space:nowrap; }
+.tab.active { background:var(--card);color:var(--text);box-shadow:var(--shadow-sm); }
+.tab .cnt { display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:99px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;margin-left:5px;vertical-align:middle; }
+.n-item { display:flex;align-items:flex-start;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border-light);transition:background .12s; }
+.n-item:last-child { border-bottom:none; }
+.n-item.unread { background:#fdfcff; }
+.n-item:hover { background:#fafbff; }
+.n-icon { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+.n-body { flex:1;min-width:0; }
+.n-title { font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px; }
+.n-sub   { font-size:13px;color:var(--text-muted);line-height:1.5; }
+.n-actions { display:flex;gap:8px;margin-top:9px; }
+.n-right { display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0; }
+.n-time  { font-size:12px;color:var(--text-muted);white-space:nowrap; }
+.n-dot   { width:8px;height:8px;border-radius:50%;background:var(--primary); }
 </style>
 </head>
-<body class="auth-body">
+<body class="app-layout">
+<div id="sidebarMount"></div>
 
-<div class="auth-left">
-  <div class="auth-brand"><div class="logo-mark">📚</div><span class="auth-brand-name">CampusPlanner</span></div>
-  <div class="auth-hero">
-    <h1 class="auth-hero-title">Recover your<br><span>account access.</span></h1>
-    <p class="auth-hero-sub">Follow the steps to securely reset your password and get back to planning.</p>
-    <div class="auth-features">
-      <div class="auth-feature"><div class="auth-feature-icon">🔒</div><span class="auth-feature-text">Verified 3-step reset process</span></div>
-      <div class="auth-feature"><div class="auth-feature-icon">⚡</div><span class="auth-feature-text">Takes less than 2 minutes</span></div>
-      <div class="auth-feature"><div class="auth-feature-icon">✅</div><span class="auth-feature-text">Your data is never lost</span></div>
+<div class="main">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Notifications 🔔</h1>
+      <p class="page-sub" id="unreadSub"></p>
     </div>
+    <button class="btn btn-outline" onclick="markAllRead()">Mark all as read</button>
   </div>
-  <p class="auth-tagline">© 2026 CampusPlanner · Built for students</p>
-</div>
 
-<div class="auth-right">
-  <div class="auth-form-wrap">
-
-    <!-- STEP 1 -->
-    <div id="step1">
-      <a class="auth-back" href="./index.html">← Back to sign in</a>
-      <div class="steps">
-        <div class="step-item active"><div class="step-circle">1</div><span>Email</span></div>
-        <div class="step-line"></div>
-        <div class="step-item"><div class="step-circle">2</div><span>Verify</span></div>
-        <div class="step-line"></div>
-        <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
-      </div>
-      <h1 class="auth-form-title">Forgot password?</h1>
-      <p class="auth-form-sub">Enter your university email and we'll send a 6-digit reset code.</p>
-      <div class="form-stack">
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input id="resetEmail" class="form-input" type="email" placeholder="you@university.edu">
-          <span class="form-error" id="emailErr">Please enter a valid email address.</span>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full btn-lg" onclick="sendCode()">Send reset code →</button>
-      <p class="auth-footer-link">Remembered it? <a href="./index.html">Sign in.</a></p>
-    </div>
-
-    <!-- STEP 2 -->
-    <div id="step2" style="display:none;">
-      <div class="steps">
-        <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
-        <div class="step-line done"></div>
-        <div class="step-item active"><div class="step-circle">2</div><span>Verify</span></div>
-        <div class="step-line"></div>
-        <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
-      </div>
-      <h1 class="auth-form-title">Check your email</h1>
-      <p class="auth-form-sub" id="codeSentMsg"></p>
-      <div class="demo-hint">🔔 Demo mode — no email is sent. Your reset code is:<span class="demo-code" id="displayCode"></span></div>
-      <div class="code-inputs">
-        <input class="code-box" id="c0" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(0)" onkeydown="codeBack(0,event)">
-        <input class="code-box" id="c1" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(1)" onkeydown="codeBack(1,event)">
-        <input class="code-box" id="c2" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(2)" onkeydown="codeBack(2,event)">
-        <input class="code-box" id="c3" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(3)" onkeydown="codeBack(3,event)">
-        <input class="code-box" id="c4" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(4)" onkeydown="codeBack(4,event)">
-        <input class="code-box" id="c5" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(5)" onkeydown="codeBack(5,event)">
-      </div>
-      <div class="ce-row" id="codeErr">Incorrect code. Please try again.</div>
-      <button class="btn btn-primary btn-full btn-lg" onclick="verifyCode()" style="margin-top:8px;">Verify code →</button>
-      <div class="resend-row">Didn't receive it? <button class="resend-btn" id="resendBtn" onclick="resendCode()">Resend</button><span id="resendTimer" style="display:none;color:#94a3b8;"></span></div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div id="step3" style="display:none;">
-      <div class="steps">
-        <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
-        <div class="step-line done"></div>
-        <div class="step-item done"><div class="step-circle">✓</div><span>Verify</span></div>
-        <div class="step-line done"></div>
-        <div class="step-item active"><div class="step-circle">3</div><span>Reset</span></div>
-      </div>
-      <h1 class="auth-form-title">Set new password</h1>
-      <p class="auth-form-sub">Choose a strong password for your account.</p>
-      <div class="form-stack">
-        <div class="form-group">
-          <label class="form-label">New password</label>
-          <input id="newPass" class="form-input" type="password" placeholder="••••••••" oninput="checkStrength()">
-          <div class="strength-bar"><div class="strength-fill" id="sFill"></div></div>
-          <span class="strength-label" id="sLabel"></span>
-          <span class="form-error" id="newPassErr">Password must be at least 6 characters.</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Confirm new password</label>
-          <input id="confirmPass" class="form-input" type="password" placeholder="••••••••" oninput="clearConfErr()">
-          <span class="form-error" id="confirmErr">Passwords do not match.</span>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full btn-lg" onclick="resetPassword()">Reset password →</button>
-    </div>
-
-    <!-- SUCCESS -->
-    <div id="stepSuccess" style="display:none;">
-      <div class="success-screen">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Password reset!</div>
-        <div class="success-sub">Your password has been updated successfully.<br>You can now sign in with your new password.</div>
-        <a class="btn btn-primary btn-full btn-lg" href="./index.html">Back to sign in →</a>
+  <div class="card">
+    <div style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div class="tab-bar">
+        <button class="tab active" onclick="setTab('all',this)">All</button>
+        <button class="tab" id="tabUnread" onclick="setTab('unread',this)">Unread</button>
+        <button class="tab" onclick="setTab('soon',this)">Due Soon</button>
+        <button class="tab" onclick="setTab('done',this)">Completed</button>
       </div>
     </div>
-
+    <div id="nList" style="margin-top:8px;"></div>
   </div>
 </div>
-
-<div class="toast success" id="toast"></div>
 
 <script>
-let code='', resendIv=null;
-function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.className='toast success show';setTimeout(()=>t.classList.remove('show'),2500); }
-function sendCode(){
-  const email=document.getElementById('resetEmail').value.trim();
-  document.getElementById('emailErr').classList.remove('show');
-  document.getElementById('resetEmail').classList.remove('error');
-  if(!email||!email.includes('@')){ document.getElementById('resetEmail').classList.add('error');document.getElementById('emailErr').classList.add('show');return; }
-  code=String(Math.floor(100000+Math.random()*900000));
-  document.getElementById('displayCode').textContent=code;
-  document.getElementById('codeSentMsg').textContent=`A reset code was sent to ${email}.`;
-  document.getElementById('step1').style.display='none';
-  document.getElementById('step2').style.display='block';
-  setTimeout(()=>document.getElementById('c0').focus(),100);
-  startTimer();
+// shared.js — sidebar builder, data layer, utilities
+// Used by all app pages (dashboard, calendar, addAssignment, notifications, course)
+
+const COURSES = {
+  cs:    { name:'Computer Science', color:'#6d57f8', soft:'#ede9fe', icon:'📘', grad:'linear-gradient(135deg,#6d57f8,#8b78ff)' },
+  prog:  { name:'Programming',      color:'#f43f5e', soft:'#fff1f2', icon:'💻', grad:'linear-gradient(135deg,#f43f5e,#fb7185)' },
+  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠', grad:'linear-gradient(135deg,#f59e0b,#fbbf24)' },
+  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
+};
+
+// ── Sign out ─────────────────────────────────────────────────
+function signOut() {
+  localStorage.removeItem('cp_logged_in');
+  window.location.replace('./index.html');
 }
-function codeInput(i){
-  const b=document.getElementById(`c${i}`);
-  b.value=b.value.replace(/\D/g,'');
-  document.getElementById('codeErr').classList.remove('show');
-  document.querySelectorAll('.code-box').forEach(x=>x.classList.remove('error'));
-  if(b.value&&i<5) document.getElementById(`c${i+1}`).focus();
-  const full=Array.from({length:6},(_,j)=>document.getElementById(`c${j}`).value).join('');
-  if(full.length===6) setTimeout(verifyCode,200);
+
+// ── Auth guard — call at top of every app page ───────────────
+function requireLogin() {
+  if (!localStorage.getItem('cp_logged_in')) {
+    window.location.replace('./index.html');
+  }
 }
-function codeBack(i,e){ if(e.key==='Backspace'&&!document.getElementById(`c${i}`).value&&i>0) document.getElementById(`c${i-1}`).focus(); }
-function verifyCode(){
-  const entered=Array.from({length:6},(_,i)=>document.getElementById(`c${i}`).value).join('');
-  if(entered.length<6){ document.getElementById('codeErr').classList.add('show');return; }
-  if(entered!==code){ document.getElementById('codeErr').classList.add('show');document.querySelectorAll('.code-box').forEach(b=>b.classList.add('error'));Array.from({length:6},(_,i)=>{document.getElementById(`c${i}`).value='';});document.getElementById('c0').focus();return; }
-  clearInterval(resendIv);
-  document.getElementById('step2').style.display='none';
-  document.getElementById('step3').style.display='block';
-  setTimeout(()=>document.getElementById('newPass').focus(),100);
+
+function getAssignments()     { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
+function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
+function getUserName()        { return localStorage.getItem('cp_user_name') || 'John'; }
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
 }
-function resendCode(){ code=String(Math.floor(100000+Math.random()*900000));document.getElementById('displayCode').textContent=code;Array.from({length:6},(_,i)=>{document.getElementById(`c${i}`).value='';});document.getElementById('codeErr').classList.remove('show');document.querySelectorAll('.code-box').forEach(b=>b.classList.remove('error'));document.getElementById('c0').focus();showToast('New code generated!');startTimer(); }
-function startTimer(){ let s=30;const btn=document.getElementById('resendBtn'),tmr=document.getElementById('resendTimer');btn.style.display='none';tmr.style.display='inline';clearInterval(resendIv);resendIv=setInterval(()=>{tmr.textContent=`Resend in ${s}s`;s--;if(s<0){clearInterval(resendIv);tmr.style.display='none';btn.style.display='inline';}},1000); }
-function checkStrength(){ const p=document.getElementById('newPass').value;document.getElementById('newPassErr').classList.remove('show');document.getElementById('newPass').classList.remove('error');let sc=0;if(p.length>=8)sc++;if(/[A-Z]/.test(p))sc++;if(/[0-9]/.test(p))sc++;if(/[^A-Za-z0-9]/.test(p))sc++;const cfg=[{w:'0%',c:'#e2e8f0',t:''},{w:'25%',c:'#f43f5e',t:'Weak'},{w:'50%',c:'#f59e0b',t:'Fair'},{w:'75%',c:'#6d57f8',t:'Good'},{w:'100%',c:'#10b981',t:'Strong'}][sc];document.getElementById('sFill').style.width=cfg.w;document.getElementById('sFill').style.background=cfg.c;document.getElementById('sLabel').textContent=cfg.t;document.getElementById('sLabel').style.color=cfg.c; }
-function clearConfErr(){ document.getElementById('confirmErr').classList.remove('show');document.getElementById('confirmPass').classList.remove('error'); }
-function resetPassword(){ const p1=document.getElementById('newPass').value,p2=document.getElementById('confirmPass').value;document.getElementById('newPassErr').classList.remove('show');document.getElementById('confirmErr').classList.remove('show');document.getElementById('newPass').classList.remove('error');document.getElementById('confirmPass').classList.remove('error');let ok=true;if(!p1||p1.length<6){document.getElementById('newPass').classList.add('error');document.getElementById('newPassErr').classList.add('show');ok=false;}if(p1!==p2){document.getElementById('confirmPass').classList.add('error');document.getElementById('confirmErr').classList.add('show');ok=false;}if(!ok)return;localStorage.setItem('cp_password',p1);document.getElementById('step3').style.display='none';document.getElementById('stepSuccess').style.display='block'; }
+
+// ── Seed data (runs if localStorage is empty) ────────────────
+function seedIfEmpty() {
+  if (getAssignments().length > 0) return;
+  const today = new Date();
+  const d = o => { const x = new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  saveAssignments([
+    {id:1,title:'Research Paper',        course:'psych',dueDate:d(6), reminder:'2',priority:'high',  estHours:'4',notes:'Manifest Destiny essay – 8 pages',  completed:false,createdAt:d(-5)},
+    {id:2,title:'Group Project',         course:'cs',   dueDate:d(4), reminder:'2',priority:'high',  estHours:'6',notes:'HCI prototype demo',                 completed:false,createdAt:d(-5)},
+    {id:3,title:'Lab Report',            course:'cs',   dueDate:d(-3),reminder:'2',priority:'medium',estHours:'2',notes:'Already submitted',                  completed:true, createdAt:d(-8)},
+    {id:4,title:'Coding Project',        course:'prog', dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'Nested loops chapter',               completed:false,createdAt:d(-2)},
+    {id:5,title:'CS Midterm',            course:'cs',   dueDate:d(18),reminder:'7',priority:'high',  estHours:'8',notes:'Study chapters 1–6',                 completed:false,createdAt:d(-2)},
+    {id:6,title:'Discrete HW',           course:'math', dueDate:d(20),reminder:'2',priority:'low',   estHours:'2',notes:'Problem set 4',                      completed:false,createdAt:d(-1)},
+    {id:7,title:'Psychology Quiz',       course:'psych',dueDate:d(13),reminder:'1',priority:'medium',estHours:'1',notes:'',                                   completed:false,createdAt:d(-1)},
+    {id:8,title:'Prog. Assignment 3',    course:'prog', dueDate:d(22),reminder:'2',priority:'medium',estHours:'3',notes:'Recursion exercises',                 completed:false,createdAt:d(0)},
+  ]);
+}
+
+// ── Delete assignment ────────────────────────────────────────
+function deleteAssignment(id, callback) {
+  if (!confirm('Delete this assignment? This cannot be undone.')) return;
+  const arr = getAssignments().filter(a => a.id !== id);
+  saveAssignments(arr);
+  showToast('🗑 Assignment deleted');
+  if (callback) callback();
+}
+
+// ── Toggle complete ──────────────────────────────────────────
+function toggleComplete(id, callback) {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === id);
+  if (!a) return;
+  a.completed = !a.completed;
+  saveAssignments(arr);
+  showToast(a.completed ? '✅ Marked complete!' : '↩ Marked incomplete');
+  if (callback) callback();
+}
+
+// ── Format date ──────────────────────────────────────────────
+function fmtDate(str) {
+  return new Date(str + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function diffDays(str) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((new Date(str + 'T00:00:00') - t) / 86400000);
+}
+
+// ── Sidebar builder ──────────────────────────────────────────
+function buildSidebar(activePage) {
+  const name     = getUserName();
+  const initials = name.substring(0, 2).toUpperCase();
+
+  const courseLinks = Object.entries(COURSES).map(([key, c]) =>
+    `<a class="nav-link${activePage === 'course-' + key ? ' active' : ''}"
+        href="./course.html?course=${key}">
+       <span class="course-pip" style="background:${c.color}"></span>
+       <span>${c.name}</span>
+     </a>`
+  ).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">📚</div>
+      <span class="logo-name">CampusPlanner</span>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Menu</div>
+      <a class="nav-link${activePage==='dashboard'      ?' active':''}" href="./dashboard.html">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a class="nav-link${activePage==='calendar'       ?' active':''}" href="./calendar.html">
+        <span class="icon">📅</span><span>Calendar</span>
+      </a>
+      <a class="nav-link${activePage==='add'            ?' active':''}" href="./addAssignment.html">
+        <span class="icon">➕</span><span>Add Assignment</span>
+      </a>
+      <a class="nav-link${activePage==='notifications'  ?' active':''}" href="./notifications.html">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Courses</div>
+      ${courseLinks}
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="profile-row">
+        <div class="avatar-circle">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="profile-name">${name} Doe</div>
+          <div class="profile-sub">Junior · CS Major</div>
+        </div>
+      </div>
+      <button onclick="signOut()" style="
+        width:100%; margin-top:8px; padding:8px 12px;
+        background:rgba(244,63,94,.12); color:#f87171;
+        border:1px solid rgba(244,63,94,.2); border-radius:8px;
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:background .15s;
+        display:flex; align-items:center; justify-content:center; gap:6px;
+      " onmouseover="this.style.background='rgba(244,63,94,.2)'"
+         onmouseout="this.style.background='rgba(244,63,94,.12)'">
+        🚪 Sign Out
+      </button>
+    </div>
+  </div>`;
+}
+
+</script>
+<script>
+document.getElementById('sidebarMount').innerHTML = buildSidebar('notifications');
+requireLogin();
+
+let currentTab = 'all';
+function getRead()  { return JSON.parse(localStorage.getItem('cp_read')||'[]'); }
+function setRead(a) { localStorage.setItem('cp_read',JSON.stringify(a)); }
+
+function buildNotifs(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const read=getRead();
+  const notifs=[];
+  getAssignments().forEach(a=>{
+    const d=diffDays(a.dueDate);
+    const c=COURSES[a.course]||{};
+    const rk=a.completed?`done-${a.id}`:`soon-${a.id}`;
+    const isRead=read.includes(rk);
+    if(a.completed){
+      notifs.push({id:a.id,type:'done',rk,title:'Assignment completed',
+        sub:`${a.title} – ${c.name||a.course} was marked complete. Great work!`,
+        icon:'✅',soft:'#ecfdf5',diff:9999,read:isRead});
+    } else if(d<0){
+      notifs.push({id:a.id,type:'soon',rk,title:'Assignment overdue!',
+        sub:`${a.title} – ${c.name||a.course} was due ${Math.abs(d)} day${Math.abs(d)!==1?'s':''} ago.`,
+        icon:'🚨',soft:'#fff1f2',diff:d,read:isRead});
+    } else if(d<=7){
+      const when=d===0?'today':d===1?'tomorrow':`in ${d} days`;
+      notifs.push({id:a.id,type:'soon',rk,
+        title:d===0?'Due today!':d<=2?`Due ${when}`:`Upcoming: ${a.title}`,
+        sub:`${a.title} – ${c.name||a.course} is due ${when}.`,
+        icon:c.icon||'📋',soft:c.soft||'#ede9fe',diff:d,read:isRead});
+    }
+  });
+  return notifs.sort((a,b)=>(a.read-b.read)||(a.diff-b.diff));
+}
+
+function timeLabel(d){
+  if(d<0) return `${Math.abs(d)}d ago`;
+  if(d===0) return 'Today';
+  if(d===1) return 'Tomorrow';
+  return `In ${d}d`;
+}
+
+function setTab(t,el){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render(){
+  const all=buildNotifs();
+  const unread=all.filter(n=>!n.read);
+  document.getElementById('unreadSub').textContent=`${unread.length} unread reminder${unread.length!==1?'s':''}`;
+  const tu=document.getElementById('tabUnread');
+  tu.innerHTML=`Unread${unread.length?`<span class="cnt">${unread.length}</span>`:''}`;
+
+  let list=all;
+  if(currentTab==='unread') list=all.filter(n=>!n.read);
+  if(currentTab==='soon')   list=all.filter(n=>n.type==='soon');
+  if(currentTab==='done')   list=all.filter(n=>n.type==='done');
+
+  const el=document.getElementById('nList');
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:56px 20px;color:var(--text-muted);font-size:13.5px;"><div style="font-size:36px;margin-bottom:10px;">🎉</div>Nothing here!</div>';
+    return;
+  }
+  el.innerHTML=list.map(n=>`
+    <div class="n-item${n.read?'':' unread'}">
+      <div class="n-icon" style="background:${n.soft}">${n.icon}</div>
+      <div class="n-body">
+        <div class="n-title">${n.title}</div>
+        <div class="n-sub">${n.sub}</div>
+        <div class="n-actions">
+          <a class="btn btn-outline btn-sm" href="./calendar.html">View calendar</a>
+          <button class="btn btn-ghost btn-sm" onclick="dismiss('${n.rk}')">Dismiss</button>
+        </div>
+      </div>
+      <div class="n-right">
+        <span class="n-time">${timeLabel(n.diff)}</span>
+        ${!n.read?'<div class="n-dot"></div>':''}
+      </div>
+    </div>`).join('');
+}
+
+function dismiss(rk){ const r=getRead(); if(!r.includes(rk))r.push(rk); setRead(r); render(); }
+function markAllRead(){ const r=getRead(); buildNotifs().forEach(n=>{if(!r.includes(n.rk))r.push(n.rk);}); setRead(r); render(); showToast('All notifications marked as read'); }
+
+render();
 </script>
 </body>
 </html>
