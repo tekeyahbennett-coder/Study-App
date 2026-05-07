@@ -1,3 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusPlanner – Add Assignment</title>
+<link rel="stylesheet" href="./main.css">
+<style>
+.form-wrap  { max-width:680px; }
+.form-inner { padding:30px 28px; display:flex; flex-direction:column; gap:20px; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.char-row   { display:flex; justify-content:space-between; align-items:center; margin-top:3px; }
+.char-count { font-size:11px; color:var(--text-muted); }
+.actions    { display:flex; gap:12px; padding-top:6px; flex-wrap:wrap; }
+.back-link  { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-muted);text-decoration:none; }
+.back-link:hover { color:var(--text); }
+.priority-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.priority-opt {
+  border:2px solid var(--border); border-radius:var(--radius-sm);
+  padding:10px 8px; cursor:pointer; text-align:center;
+  transition:all .15s; user-select:none;
+}
+.priority-opt:hover { border-color:#c8d0dc; background:var(--bg); }
+.priority-opt.sel-high   { border-color:var(--prog); background:#fff1f2; }
+.priority-opt.sel-medium { border-color:var(--psych); background:#fffbeb; }
+.priority-opt.sel-low    { border-color:var(--math); background:#ecfdf5; }
+.priority-opt .p-icon  { font-size:18px; margin-bottom:3px; }
+.priority-opt .p-label { font-size:12px; font-weight:600; color:var(--text-muted); }
+.priority-opt.sel-high   .p-label { color:var(--prog); }
+.priority-opt.sel-medium .p-label { color:#b45309; }
+.priority-opt.sel-low    .p-label { color:var(--math); }
+.field-hint { font-size:11.5px; color:var(--text-muted); margin-top:3px; }
+</style>
+</head>
+<body class="app-layout">
+<div id="sidebarMount"></div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" id="pageTitle">Add Assignment</h1>
+      <p class="page-sub">Fill in the details to track a new assignment</p>
+    </div>
+    <a class="back-link" href="./dashboard.html">← Back to Dashboard</a>
+  </div>
+
+  <div class="card form-wrap">
+    <div class="form-inner">
+
+      <div class="form-group">
+        <label class="form-label">Assignment Title <span class="req">*</span></label>
+        <input id="title" class="form-input" type="text"
+          placeholder="e.g. Coding Project – Nested Loops"
+          maxlength="120" oninput="updateChar()">
+        <div class="char-row">
+          <span class="form-error" id="titleErr">Please enter an assignment title.</span>
+          <span class="char-count"><span id="cc">0</span>/120</span>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Course <span class="req">*</span></label>
+          <select id="course" class="form-input" onchange="clearE('course','courseErr')">
+            <option value="">Select a course…</option>
+            <option value="cs">📘 Computer Science</option>
+            <option value="prog">💻 Programming</option>
+            <option value="psych">🧠 Psychology</option>
+            <option value="math">📐 Discrete Math</option>
+          </select>
+          <span class="form-error" id="courseErr">Please select a course.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Due Date <span class="req">*</span></label>
+          <input id="dueDate" class="form-input" type="date"
+            onchange="clearE('dueDate','dateErr')">
+          <span class="form-error" id="dateErr">Please select a due date.</span>
+          <span class="field-hint">Click the field to open the date picker</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <div class="priority-grid">
+          <div class="priority-opt" id="p-high" onclick="setPriority('high')">
+            <div class="p-icon">🔴</div><div class="p-label">High</div>
+          </div>
+          <div class="priority-opt sel-medium" id="p-medium" onclick="setPriority('medium')">
+            <div class="p-icon">🟡</div><div class="p-label">Medium</div>
+          </div>
+          <div class="priority-opt" id="p-low" onclick="setPriority('low')">
+            <div class="p-icon">🟢</div><div class="p-label">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Estimated Time</label>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="estHours" class="form-input" type="number" min="0" max="200"
+              placeholder="e.g. 3" style="max-width:110px;">
+            <span style="font-size:14px;color:var(--text-muted);font-weight:500;">hours</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reminder</label>
+          <select id="reminder" class="form-input">
+            <option value="1">1 day before due date</option>
+            <option value="2" selected>2 days before due date</option>
+            <option value="3">3 days before due date</option>
+            <option value="7">1 week before due date</option>
+          </select>
+          <span class="field-hint">You'll see a notification this many days before.</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes & Details</label>
+        <textarea id="notes" class="form-input"
+          placeholder="Add requirements, links, or anything useful about this assignment…"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="saveBtn" onclick="saveAssignment()">💾 Save Assignment</button>
+        <a class="btn btn-outline" href="./dashboard.html">Cancel</a>
+        <button class="btn btn-danger" id="deleteBtn" style="display:none;" onclick="doDelete()">🗑 Delete</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
 // shared.js — sidebar builder, data layer, utilities
 // Used by all app pages (dashboard, calendar, addAssignment, notifications, course)
 
@@ -8,9 +142,15 @@ const COURSES = {
   math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
 };
 
+// ── Sign out ─────────────────────────────────────────────────
+function signOut() {
+  localStorage.removeItem('cp_logged_in');
+  window.location.replace('./index.html');
+}
+
 // ── Auth guard — call at top of every app page ───────────────
 function requireLogin() {
-  if (!sessionStorage.getItem('cp_logged_in')) {
+  if (!localStorage.getItem('cp_logged_in')) {
     window.location.replace('./index.html');
   }
 }
@@ -125,11 +265,108 @@ function buildSidebar(activePage) {
     <div class="sidebar-footer">
       <div class="profile-row">
         <div class="avatar-circle">${initials}</div>
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="profile-name">${name} Doe</div>
           <div class="profile-sub">Junior · CS Major</div>
         </div>
       </div>
+      <button onclick="signOut()" style="
+        width:100%; margin-top:8px; padding:8px 12px;
+        background:rgba(244,63,94,.12); color:#f87171;
+        border:1px solid rgba(244,63,94,.2); border-radius:8px;
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:background .15s;
+        display:flex; align-items:center; justify-content:center; gap:6px;
+      " onmouseover="this.style.background='rgba(244,63,94,.2)'"
+         onmouseout="this.style.background='rgba(244,63,94,.12)'">
+        🚪 Sign Out
+      </button>
     </div>
   </div>`;
 }
+
+</script>
+<script>
+document.getElementById('sidebarMount').innerHTML = buildSidebar('add');
+requireLogin();
+document.getElementById('dueDate').min = new Date().toISOString().split('T')[0];
+
+let priority = 'medium';
+let editId   = null;
+
+// Check if editing an existing assignment
+const params = new URLSearchParams(window.location.search);
+if (params.get('edit')) {
+  editId = parseInt(params.get('edit'));
+  const a = getAssignments().find(x => x.id === editId);
+  if (a) {
+    document.getElementById('pageTitle').textContent = 'Edit Assignment';
+    document.getElementById('title').value    = a.title;
+    document.getElementById('course').value   = a.course;
+    document.getElementById('dueDate').value  = a.dueDate;
+    document.getElementById('estHours').value = a.estHours || '';
+    document.getElementById('notes').value    = a.notes || '';
+    document.getElementById('reminder').value = a.reminder || '2';
+    document.getElementById('cc').textContent = a.title.length;
+    document.getElementById('deleteBtn').style.display = 'inline-flex';
+    setPriority(a.priority || 'medium');
+  }
+}
+
+function setPriority(p) {
+  priority = p;
+  ['high','medium','low'].forEach(x => {
+    document.getElementById(`p-${x}`).className =
+      `priority-opt${p===x?' sel-'+x:''}`;
+  });
+}
+function updateChar() {
+  document.getElementById('cc').textContent = document.getElementById('title').value.length;
+  clearE('title','titleErr');
+}
+function clearE(i,e) {
+  document.getElementById(i).classList.remove('error');
+  document.getElementById(e).classList.remove('show');
+}
+function saveAssignment() {
+  const title   = document.getElementById('title').value.trim();
+  const course  = document.getElementById('course').value;
+  const dueDate = document.getElementById('dueDate').value;
+  const reminder= document.getElementById('reminder').value;
+  const estHours= document.getElementById('estHours').value;
+  const notes   = document.getElementById('notes').value.trim();
+
+  ['title','course','dueDate'].forEach(id => document.getElementById(id).classList.remove('error'));
+  ['titleErr','courseErr','dateErr'].forEach(id => document.getElementById(id).classList.remove('show'));
+
+  let ok = true;
+  if (!title)   { document.getElementById('title').classList.add('error');   document.getElementById('titleErr').classList.add('show');  ok=false; }
+  if (!course)  { document.getElementById('course').classList.add('error');  document.getElementById('courseErr').classList.add('show'); ok=false; }
+  if (!dueDate) { document.getElementById('dueDate').classList.add('error'); document.getElementById('dateErr').classList.add('show');   ok=false; }
+  if (!ok) return;
+
+  const arr = getAssignments();
+  if (editId) {
+    const idx = arr.findIndex(a => a.id === editId);
+    if (idx !== -1) {
+      arr[idx] = {...arr[idx], title, course, dueDate, priority, reminder, estHours, notes};
+    }
+  } else {
+    const newId = arr.length ? Math.max(...arr.map(a=>a.id))+1 : 1;
+    arr.push({id:newId, title, course, dueDate, priority, reminder, estHours, notes,
+      completed:false, createdAt:new Date().toISOString().split('T')[0]});
+  }
+  saveAssignments(arr);
+  showToast(editId ? '✅ Assignment updated!' : '✅ Assignment saved!');
+  setTimeout(() => window.location.href='./dashboard.html', 1200);
+}
+function doDelete() {
+  if (!confirm('Delete this assignment? This cannot be undone.')) return;
+  const arr = getAssignments().filter(a => a.id !== editId);
+  saveAssignments(arr);
+  showToast('🗑 Assignment deleted');
+  setTimeout(() => window.location.href='./dashboard.html', 900);
+}
+</script>
+</body>
+</html>
