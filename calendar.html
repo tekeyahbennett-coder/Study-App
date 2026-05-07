@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusPlanner – Calendar</title>
+<link rel="stylesheet" href="./main.css">
+<style>
+.cal-shell { display:flex;flex-direction:column;gap:14px;flex:1;min-height:0; }
+.cal-topbar { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
+.cal-nav { display:flex;align-items:center;gap:10px; }
+.cal-arrow { width:32px;height:32px;border-radius:var(--radius-sm);background:var(--card);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text-muted);transition:all .12s; }
+.cal-arrow:hover { background:var(--bg);color:var(--text);border-color:#c8d0dc; }
+.cal-month { font-size:18px;font-weight:800;min-width:160px;text-align:center;letter-spacing:-.02em; }
+.cal-legend { display:flex;flex-wrap:wrap;gap:12px;align-items:center; }
+.leg-item { display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-muted); }
+.leg-dot  { width:9px;height:9px;border-radius:50%;flex-shrink:0; }
+.view-btns { display:flex;gap:3px;background:var(--bg);border-radius:var(--radius-sm);padding:3px;border:1.5px solid var(--border); }
+.view-btn { padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:all .12s;font-family:inherit; }
+.view-btn.active  { background:var(--card);color:var(--text);box-shadow:var(--shadow-sm); }
+.view-btn.off     { opacity:.4;cursor:not-allowed; }
+.cal-grid { background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;display:grid;grid-template-columns:repeat(7,1fr);box-shadow:var(--shadow-sm);flex:1; }
+.cal-dh { padding:10px 8px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);background:var(--bg);border-bottom:1px solid var(--border); }
+.cal-cell { border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 7px;min-height:88px; }
+.cal-cell:nth-child(7n){ border-right:none; }
+.cal-cell.other { background:#fafbfc; }
+.cal-cell.other .cal-date { color:#ccd4de; }
+.cal-cell.is-today { background:#f5f3ff; }
+.cal-date { font-size:12px;font-weight:600;color:var(--text-muted);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:3px; }
+.cal-cell.is-today .cal-date { background:var(--primary);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(109,87,248,.4); }
+.cal-event { font-size:11px;font-weight:600;padding:3px 7px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:filter .12s,transform .1s;display:block; }
+.cal-event:hover { filter:brightness(.92);transform:translateY(-1px); }
+.cal-event.cs    { background:var(--cs-soft);    color:var(--cs);   }
+.cal-event.prog  { background:var(--prog-soft);  color:var(--prog); }
+.cal-event.psych { background:var(--psych-soft); color:#92400e;     }
+.cal-event.math  { background:var(--math-soft);  color:var(--math); }
+.cal-event.done  { background:var(--done-soft);  color:var(--done); text-decoration:line-through; }
+.cal-event.new-item { animation:flashIn .6s ease; }
+@keyframes flashIn { 0%{transform:scale(1.08);filter:brightness(1.2);} 100%{transform:scale(1);filter:brightness(1);} }
+/* Week view */
+.week-grid { background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);flex:1;display:grid;grid-template-columns:repeat(7,1fr);overflow:hidden; }
+.week-dh { padding:12px 8px 8px;text-align:center;background:var(--bg);border-bottom:1px solid var(--border);border-right:1px solid var(--border); }
+.week-dh:last-child { border-right:none; }
+.week-day-name { font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted); }
+.week-day-num  { font-size:20px;font-weight:800;color:var(--text-muted);margin-top:4px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin:4px auto 0; }
+.week-dh.is-today .week-day-num { background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(109,87,248,.4); }
+.week-col { border-right:1px solid var(--border);padding:8px 6px;min-height:200px;overflow-y:auto; }
+.week-col:last-child { border-right:none; }
+.week-col.is-today { background:#f5f3ff; }
+.week-empty { font-size:11px;color:var(--border);text-align:center;padding-top:12px; }
+.modal-row { display:flex;gap:10px;align-items:flex-start;margin-bottom:11px;font-size:13.5px; }
+.modal-lbl { color:var(--text-muted);font-weight:600;min-width:90px; }
+.modal-val { color:var(--text);font-weight:500; }
+</style>
+</head>
+<body class="app-layout">
+<div id="sidebarMount"></div>
+
+<div class="main" style="gap:16px;">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Calendar 📅</h1>
+      <p class="page-sub">View and manage all assignments by date</p>
+    </div>
+    <a class="btn btn-primary" href="./addAssignment.html">+ Add Assignment</a>
+  </div>
+
+  <div class="cal-shell">
+    <div class="cal-topbar">
+      <div class="cal-nav">
+        <div class="cal-arrow" onclick="navigate(-1)">&#8249;</div>
+        <div class="cal-month" id="monthLbl"></div>
+        <div class="cal-arrow" onclick="navigate(1)">&#8250;</div>
+      </div>
+      <div class="cal-legend" id="calLegend"></div>
+      <div class="view-btns">
+        <button class="view-btn active" id="btnMonth" onclick="setView('month')">Month</button>
+        <button class="view-btn" id="btnWeek"  onclick="setView('week')">Week</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid">
+      <div class="cal-dh">Sun</div><div class="cal-dh">Mon</div><div class="cal-dh">Tue</div>
+      <div class="cal-dh">Wed</div><div class="cal-dh">Thu</div><div class="cal-dh">Fri</div><div class="cal-dh">Sat</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="modal">
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-row"><span class="modal-lbl">Course</span><span class="modal-val" id="mCourse"></span></div>
+    <div class="modal-row"><span class="modal-lbl">Due Date</span><span class="modal-val" id="mDue"></span></div>
+    <div class="modal-row"><span class="modal-lbl">Priority</span><span class="modal-val" id="mPriority"></span></div>
+    <div class="modal-row" id="mEstRow"><span class="modal-lbl">Est. Time</span><span class="modal-val" id="mEst"></span></div>
+    <div class="modal-row" id="mNotesRow"><span class="modal-lbl">Notes</span><span class="modal-val" id="mNotes" style="white-space:pre-wrap;"></span></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-sm" id="mToggle" onclick="toggleFromModal()">Mark Complete</button>
+      <a class="btn btn-outline btn-sm" id="mEdit">✏️ Edit</a>
+      <button class="btn btn-danger btn-sm" onclick="deleteFromModal()">🗑 Delete</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// shared.js — sidebar builder, data layer, utilities
+// Used by all app pages (dashboard, calendar, addAssignment, notifications, course)
+
+const COURSES = {
+  cs:    { name:'Computer Science', color:'#6d57f8', soft:'#ede9fe', icon:'📘', grad:'linear-gradient(135deg,#6d57f8,#8b78ff)' },
+  prog:  { name:'Programming',      color:'#f43f5e', soft:'#fff1f2', icon:'💻', grad:'linear-gradient(135deg,#f43f5e,#fb7185)' },
+  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠', grad:'linear-gradient(135deg,#f59e0b,#fbbf24)' },
+  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
+};
+
+// ── Sign out ─────────────────────────────────────────────────
+function signOut() {
+  localStorage.removeItem('cp_logged_in');
+  window.location.replace('./index.html');
+}
+
+// ── Auth guard — call at top of every app page ───────────────
+function requireLogin() {
+  if (!localStorage.getItem('cp_logged_in')) {
+    window.location.replace('./index.html');
+  }
+}
+
+function getAssignments()     { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
+function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
+function getUserName()        { return localStorage.getItem('cp_user_name') || 'John'; }
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── Seed data (runs if localStorage is empty) ────────────────
+function seedIfEmpty() {
+  if (getAssignments().length > 0) return;
+  const today = new Date();
+  const d = o => { const x = new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  saveAssignments([
+    {id:1,title:'Research Paper',        course:'psych',dueDate:d(6), reminder:'2',priority:'high',  estHours:'4',notes:'Manifest Destiny essay – 8 pages',  completed:false,createdAt:d(-5)},
+    {id:2,title:'Group Project',         course:'cs',   dueDate:d(4), reminder:'2',priority:'high',  estHours:'6',notes:'HCI prototype demo',                 completed:false,createdAt:d(-5)},
+    {id:3,title:'Lab Report',            course:'cs',   dueDate:d(-3),reminder:'2',priority:'medium',estHours:'2',notes:'Already submitted',                  completed:true, createdAt:d(-8)},
+    {id:4,title:'Coding Project',        course:'prog', dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'Nested loops chapter',               completed:false,createdAt:d(-2)},
+    {id:5,title:'CS Midterm',            course:'cs',   dueDate:d(18),reminder:'7',priority:'high',  estHours:'8',notes:'Study chapters 1–6',                 completed:false,createdAt:d(-2)},
+    {id:6,title:'Discrete HW',           course:'math', dueDate:d(20),reminder:'2',priority:'low',   estHours:'2',notes:'Problem set 4',                      completed:false,createdAt:d(-1)},
+    {id:7,title:'Psychology Quiz',       course:'psych',dueDate:d(13),reminder:'1',priority:'medium',estHours:'1',notes:'',                                   completed:false,createdAt:d(-1)},
+    {id:8,title:'Prog. Assignment 3',    course:'prog', dueDate:d(22),reminder:'2',priority:'medium',estHours:'3',notes:'Recursion exercises',                 completed:false,createdAt:d(0)},
+  ]);
+}
+
+// ── Delete assignment ────────────────────────────────────────
+function deleteAssignment(id, callback) {
+  if (!confirm('Delete this assignment? This cannot be undone.')) return;
+  const arr = getAssignments().filter(a => a.id !== id);
+  saveAssignments(arr);
+  showToast('🗑 Assignment deleted');
+  if (callback) callback();
+}
+
+// ── Toggle complete ──────────────────────────────────────────
+function toggleComplete(id, callback) {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === id);
+  if (!a) return;
+  a.completed = !a.completed;
+  saveAssignments(arr);
+  showToast(a.completed ? '✅ Marked complete!' : '↩ Marked incomplete');
+  if (callback) callback();
+}
+
+// ── Format date ──────────────────────────────────────────────
+function fmtDate(str) {
+  return new Date(str + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function diffDays(str) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((new Date(str + 'T00:00:00') - t) / 86400000);
+}
+
+// ── Sidebar builder ──────────────────────────────────────────
+function buildSidebar(activePage) {
+  const name     = getUserName();
+  const initials = name.substring(0, 2).toUpperCase();
+
+  const courseLinks = Object.entries(COURSES).map(([key, c]) =>
+    `<a class="nav-link${activePage === 'course-' + key ? ' active' : ''}"
+        href="./course.html?course=${key}">
+       <span class="course-pip" style="background:${c.color}"></span>
+       <span>${c.name}</span>
+     </a>`
+  ).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">📚</div>
+      <span class="logo-name">CampusPlanner</span>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Menu</div>
+      <a class="nav-link${activePage==='dashboard'      ?' active':''}" href="./dashboard.html">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a class="nav-link${activePage==='calendar'       ?' active':''}" href="./calendar.html">
+        <span class="icon">📅</span><span>Calendar</span>
+      </a>
+      <a class="nav-link${activePage==='add'            ?' active':''}" href="./addAssignment.html">
+        <span class="icon">➕</span><span>Add Assignment</span>
+      </a>
+      <a class="nav-link${activePage==='notifications'  ?' active':''}" href="./notifications.html">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Courses</div>
+      ${courseLinks}
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="profile-row">
+        <div class="avatar-circle">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="profile-name">${name} Doe</div>
+          <div class="profile-sub">Junior · CS Major</div>
+        </div>
+      </div>
+      <button onclick="signOut()" style="
+        width:100%; margin-top:8px; padding:8px 12px;
+        background:rgba(244,63,94,.12); color:#f87171;
+        border:1px solid rgba(244,63,94,.2); border-radius:8px;
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:background .15s;
+        display:flex; align-items:center; justify-content:center; gap:6px;
+      " onmouseover="this.style.background='rgba(244,63,94,.2)'"
+         onmouseout="this.style.background='rgba(244,63,94,.12)'">
+        🚪 Sign Out
+      </button>
+    </div>
+  </div>`;
+}
+
+</script>
+<script>
+document.getElementById('sidebarMount').innerHTML = buildSidebar('calendar');
+requireLogin();
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let yr       = new Date().getFullYear();
+let mo       = new Date().getMonth();
+let weekStart = getWeekStart(new Date()); // Monday-anchored week
+let currentView = 'month';
+let activeId = null;
+
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - day); // go back to Sunday
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('btnMonth').classList.toggle('active', v==='month');
+  document.getElementById('btnWeek').classList.toggle('active',  v==='week');
+  render();
+}
+
+function navigate(dir) {
+  if (currentView === 'month') {
+    mo += dir;
+    if(mo>11){mo=0;yr++;} if(mo<0){mo=11;yr--;}
+  } else {
+    weekStart.setDate(weekStart.getDate() + dir*7);
+  }
+  render();
+}
+
+function buildLegend() {
+  return Object.entries(COURSES).map(([k,c])=>
+    `<div class="leg-item"><span class="leg-dot" style="background:${c.color}"></span>${c.name}</div>`
+  ).join('') + `<div class="leg-item"><span class="leg-dot" style="background:var(--done)"></span>Completed</div>`;
+}
+
+function makeEventEl(a) {
+  const c = COURSES[a.course]||{};
+  const ev = document.createElement('div');
+  ev.className = `cal-event ${a.completed?'done':a.course}`;
+  ev.textContent = a.title;
+  ev.title = `${a.title} · ${c.name||a.course}`;
+  ev.onclick = e => { e.stopPropagation(); openModal(a.id); };
+  return ev;
+}
+
+function render() {
+  document.getElementById('calLegend').innerHTML = buildLegend();
+  if (currentView === 'month') renderMonth();
+  else renderWeek();
+}
+
+function renderMonth() {
+  document.getElementById('monthLbl').textContent = `${MONTHS[mo]} ${yr}`;
+
+  // Replace grid with month grid (7-col)
+  const shell = document.querySelector('.cal-shell');
+  let grid = document.getElementById('calGrid');
+  if (!grid || grid.className !== 'cal-grid') {
+    const old = document.getElementById('calGrid') || document.getElementById('weekGrid');
+    const newGrid = document.createElement('div');
+    newGrid.id = 'calGrid'; newGrid.className = 'cal-grid';
+    DAYS.forEach(d => { const h=document.createElement('div'); h.className='cal-dh'; h.textContent=d; newGrid.appendChild(h); });
+    if (old) old.replaceWith(newGrid);
+    else shell.appendChild(newGrid);
+    grid = newGrid;
+  }
+  while(grid.children.length>7) grid.removeChild(grid.lastChild);
+
+  const assignments = getAssignments();
+  const firstDay    = new Date(yr,mo,1).getDay();
+  const daysInMonth = new Date(yr,mo+1,0).getDate();
+  const prevDays    = new Date(yr,mo,0).getDate();
+  const todayStr    = new Date().toISOString().split('T')[0];
+
+  for(let i=firstDay-1;i>=0;i--) {
+    const c=document.createElement('div'); c.className='cal-cell other';
+    c.innerHTML=`<div class="cal-date">${prevDays-i}</div>`; grid.appendChild(c);
+  }
+  for(let d=1;d<=daysInMonth;d++) {
+    const dateStr=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr===todayStr;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell'+(isToday?' is-today':'');
+    const dateDiv = document.createElement('div');
+    dateDiv.className='cal-date'; dateDiv.textContent=d; cell.appendChild(dateDiv);
+    assignments.filter(a=>a.dueDate===dateStr).forEach(a=>cell.appendChild(makeEventEl(a)));
+    grid.appendChild(cell);
+  }
+  const total=firstDay+daysInMonth;
+  const rem=total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++){
+    const c=document.createElement('div'); c.className='cal-cell other';
+    c.innerHTML=`<div class="cal-date">${i}</div>`; grid.appendChild(c);
+  }
+}
+
+function renderWeek() {
+  const ws = new Date(weekStart);
+  const we = new Date(ws); we.setDate(we.getDate()+6);
+  const fmt = d => d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.getElementById('monthLbl').textContent = `${fmt(ws)} – ${fmt(we)}`;
+
+  const shell    = document.querySelector('.cal-shell');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const assignments = getAssignments();
+
+  // Build week grid
+  const weekGrid = document.createElement('div');
+  weekGrid.id = 'calGrid'; weekGrid.className = 'week-grid';
+
+  for(let i=0;i<7;i++) {
+    const day = new Date(ws); day.setDate(ws.getDate()+i);
+    const dateStr = day.toISOString().split('T')[0];
+    const isToday = dateStr===todayStr;
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'week-dh'+(isToday?' is-today':'');
+    hdr.innerHTML = `<div class="week-day-name">${DAYS[day.getDay()]}</div>
+                     <div class="week-day-num">${day.getDate()}</div>`;
+    weekGrid.appendChild(hdr);
+  }
+
+  // Day columns
+  for(let i=0;i<7;i++) {
+    const day = new Date(ws); day.setDate(ws.getDate()+i);
+    const dateStr = day.toISOString().split('T')[0];
+    const isToday = dateStr===todayStr;
+    const dayAssignments = assignments.filter(a=>a.dueDate===dateStr);
+
+    const col = document.createElement('div');
+    col.className = 'week-col'+(isToday?' is-today':'');
+
+    if(dayAssignments.length===0) {
+      col.innerHTML = '<div class="week-empty">—</div>';
+    } else {
+      dayAssignments.forEach(a=>col.appendChild(makeEventEl(a)));
+    }
+    weekGrid.appendChild(col);
+  }
+
+  const old = document.getElementById('calGrid');
+  if(old) old.replaceWith(weekGrid);
+  else shell.appendChild(weekGrid);
+}
+
+function openModal(id) {
+  const a=getAssignments().find(x=>x.id===id); if(!a) return;
+  activeId=id;
+  const c=COURSES[a.course]||{};
+  document.getElementById('mTitle').textContent=a.title;
+  document.getElementById('mCourse').innerHTML=`<span class="badge badge-${a.course}">${c.name||a.course}</span>`;
+  document.getElementById('mDue').textContent=fmtDate(a.dueDate);
+  document.getElementById('mPriority').textContent=a.priority?a.priority.charAt(0).toUpperCase()+a.priority.slice(1):'Medium';
+  document.getElementById('mEst').textContent=a.estHours?`${a.estHours} hours`:'—';
+  document.getElementById('mEstRow').style.display=a.estHours?'flex':'none';
+  document.getElementById('mNotes').textContent=a.notes||'—';
+  document.getElementById('mNotesRow').style.display='flex';
+  document.getElementById('mEdit').href=`./addAssignment.html?edit=${id}`;
+  const btn=document.getElementById('mToggle');
+  btn.textContent=a.completed?'Mark Incomplete':'Mark Complete';
+  btn.className=a.completed?'btn btn-outline btn-sm':'btn btn-primary btn-sm';
+  document.getElementById('overlay').classList.add('open');
+}
+function toggleFromModal(){
+  const arr=getAssignments(); const a=arr.find(x=>x.id===activeId); if(!a) return;
+  a.completed=!a.completed; saveAssignments(arr);
+  showToast(a.completed?'✅ Marked complete!':'↩ Marked incomplete');
+  document.getElementById('overlay').classList.remove('open');
+  render();
+}
+function deleteFromModal(){
+  if(!confirm('Delete this assignment?')) return;
+  saveAssignments(getAssignments().filter(x=>x.id!==activeId));
+  document.getElementById('overlay').classList.remove('open');
+  showToast('🗑 Assignment deleted');
+  render();
+}
+function closeOverlay(e){ if(e.target===document.getElementById('overlay')) document.getElementById('overlay').classList.remove('open'); }
+
+render();
+</script>
+</body>
+</html>
