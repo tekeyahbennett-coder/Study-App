@@ -49,6 +49,11 @@ body.app-layout {
   overflow: hidden;
 }
 
+/* Make sidebar mount wrapper transparent to flexbox layout */
+#sidebarMount {
+  display: contents;
+}
+
 /* ── SIDEBAR ───────────────────────────────────────── */
 .sidebar {
   width: 256px; min-width: 256px;
