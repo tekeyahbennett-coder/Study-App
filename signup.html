@@ -6,203 +6,136 @@
 <title>CampusPlanner – Notifications</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-.filter-tabs {
-  display: flex; gap: 6px; flex-wrap: wrap;
-}
-.tab {
-  padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600;
-  cursor: pointer; border: 1.5px solid var(--border);
-  background: var(--card); color: var(--text-muted); transition: all .12s;
-}
-.tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-.notif-list { display: flex; flex-direction: column; }
-.notif-item {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px 22px; border-bottom: 1px solid var(--border);
-  transition: background .12s;
-}
-.notif-item:last-child { border-bottom: none; }
-.notif-item.unread { background: #fafbff; }
-.notif-item:hover { background: var(--bg); }
-.notif-icon {
-  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 18px;
-}
-.notif-body { flex: 1; min-width: 0; }
-.notif-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-.notif-sub   { font-size: 13px; color: var(--text-muted); }
-.notif-time  { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-.notif-dot   {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--primary); flex-shrink: 0; margin-top: 6px;
-}
-.notif-actions { display: flex; gap: 8px; margin-top: 8px; }
-.empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:14px; }
-.empty-icon  { font-size:40px; margin-bottom:10px; }
+.tab-bar { display:flex;gap:3px;background:var(--bg);border-radius:var(--radius-sm);padding:3px;border:1.5px solid var(--border); }
+.tab { padding:6px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:all .12s;font-family:inherit;white-space:nowrap; }
+.tab.active { background:var(--card);color:var(--text);box-shadow:var(--shadow-sm); }
+.tab .cnt { display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:99px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;margin-left:5px;vertical-align:middle; }
+.n-item { display:flex;align-items:flex-start;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border-light);transition:background .12s; }
+.n-item:last-child { border-bottom:none; }
+.n-item.unread { background:#fdfcff; }
+.n-item:hover { background:#fafbff; }
+.n-icon { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+.n-body { flex:1;min-width:0; }
+.n-title { font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px; }
+.n-sub   { font-size:13px;color:var(--text-muted);line-height:1.5; }
+.n-actions { display:flex;gap:8px;margin-top:9px; }
+.n-right { display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0; }
+.n-time  { font-size:12px;color:var(--text-muted);white-space:nowrap; }
+.n-dot   { width:8px;height:8px;border-radius:50%;background:var(--primary); }
 </style>
 </head>
-<body>
-<div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">📚</div>
-    <span>CampusPlanner</span>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Navigation</div>
-    <a class="nav-item" href="./dashboard.html"><span class="ni">🏠</span> Dashboard</a>
-    <a class="nav-item" href="./calendar.html"><span class="ni">📅</span> Calendar</a>
-    <a class="nav-item" href="./addAssignment.html"><span class="ni">➕</span> Add Assignment</a>
-    <a class="nav-item active" href="./notifications.html"><span class="ni">🔔</span> Notifications</a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Courses</div>
-    <a class="nav-item" href="./course.html?course=cs"><span class="course-dot" style="background:var(--cs)"></span> Computer Science</a>
-    <a class="nav-item" href="./course.html?course=prog"><span class="course-dot" style="background:var(--prog)"></span> Programming</a>
-    <a class="nav-item" href="./course.html?course=psych"><span class="course-dot" style="background:var(--psych)"></span> Psychology</a>
-    <a class="nav-item" href="./course.html?course=math"><span class="course-dot" style="background:var(--math)"></span> Discrete Math</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="profile-block">
-      <div class="avatar">JD</div>
-      <div>
-        <div class="profile-name">John Doe</div>
-        <div class="profile-sub">Junior • CS Major</div>
-      </div>
-    </div>
-  </div>
-</div>
+<body class="app-layout">
+<div id="sidebarMount"></div>
 
 <div class="main">
   <div class="page-header">
     <div>
       <h1 class="page-title">Notifications 🔔</h1>
-      <p class="page-sub" id="unreadLabel"></p>
+      <p class="page-sub" id="unreadSub"></p>
     </div>
     <button class="btn btn-outline" onclick="markAllRead()">Mark all as read</button>
   </div>
 
   <div class="card">
-    <div style="padding:16px 22px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-      <div class="filter-tabs">
-        <div class="tab active" onclick="setFilter('all',this)">All</div>
-        <div class="tab" onclick="setFilter('unread',this)">Unread</div>
-        <div class="tab" onclick="setFilter('soon',this)">Due Soon</div>
-        <div class="tab" onclick="setFilter('completed',this)">Completed</div>
+    <div style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div class="tab-bar">
+        <button class="tab active" onclick="setTab('all',this)">All</button>
+        <button class="tab" id="tabUnread" onclick="setTab('unread',this)">Unread</button>
+        <button class="tab" onclick="setTab('soon',this)">Due Soon</button>
+        <button class="tab" onclick="setTab('done',this)">Completed</button>
       </div>
     </div>
-    <div class="notif-list" id="notifList" style="margin-top:8px;"></div>
+    <div id="nList" style="margin-top:8px;"></div>
   </div>
 </div>
 
+<script src="./shared.js"></script>
 <script>
-const COURSES = {
-  cs:    { name:'Computer Science', color:'#6366f1', soft:'#eef2ff', icon:'📘' },
-  prog:  { name:'Programming',      color:'#ef4444', soft:'#fef2f2', icon:'💻' },
-  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠' },
-  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐' },
-};
+document.getElementById('sidebarMount').innerHTML = buildSidebar('notifications');
 
-function getAssignments() { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
-function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
-function getRead() { return JSON.parse(localStorage.getItem('cp_read') || '[]'); }
-function setRead(arr) { localStorage.setItem('cp_read', JSON.stringify(arr)); }
+let currentTab = 'all';
+function getRead()  { return JSON.parse(localStorage.getItem('cp_read')||'[]'); }
+function setRead(a) { localStorage.setItem('cp_read',JSON.stringify(a)); }
 
-let currentFilter = 'all';
-
-function buildNotifications() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const assignments = getAssignments();
-  const readIds = getRead();
-  const notifs = [];
-
-  assignments.forEach(a => {
-    const due = new Date(a.dueDate + 'T00:00:00');
-    const diff = Math.ceil((due - today) / 86400000);
-    const c = COURSES[a.course] || {};
-
-    if (a.completed) {
-      notifs.push({ id: a.id, type:'completed', title:'Assignment completed', sub:`${a.title} – ${c.name||a.course} was marked complete. Great work!`, icon:'✅', soft:'#ecfdf5', color:'#10b981', diff: 9999, read: readIds.includes(`done-${a.id}`) });
-    } else if (diff === 0) {
-      notifs.push({ id: a.id, type:'soon', title:'Assignment due today!', sub:`${a.title} – ${c.name||a.course} is due today.`, icon:'🚨', soft:'#fef2f2', color:'#ef4444', diff, read: readIds.includes(`soon-${a.id}`) });
-    } else if (diff > 0 && diff <= 3) {
-      notifs.push({ id: a.id, type:'soon', title:`Assignment due in ${diff} day${diff>1?'s':''}`, sub:`${a.title} – ${c.name||a.course} is due ${diff===1?'tomorrow':'in '+diff+' days'}.`, icon: c.icon||'📋', soft: c.soft||'#eef2ff', color: c.color||'#6366f1', diff, read: readIds.includes(`soon-${a.id}`) });
-    } else if (diff > 3 && diff <= 7) {
-      notifs.push({ id: a.id, type:'soon', title:`Upcoming: ${a.title}`, sub:`${c.name||a.course} is due in ${diff} days.`, icon: c.icon||'📋', soft: c.soft||'#eef2ff', color: c.color||'#6366f1', diff, read: readIds.includes(`soon-${a.id}`) });
+function buildNotifs(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const read=getRead();
+  const notifs=[];
+  getAssignments().forEach(a=>{
+    const d=diffDays(a.dueDate);
+    const c=COURSES[a.course]||{};
+    const rk=a.completed?`done-${a.id}`:`soon-${a.id}`;
+    const isRead=read.includes(rk);
+    if(a.completed){
+      notifs.push({id:a.id,type:'done',rk,title:'Assignment completed',
+        sub:`${a.title} – ${c.name||a.course} was marked complete. Great work!`,
+        icon:'✅',soft:'#ecfdf5',diff:9999,read:isRead});
+    } else if(d<0){
+      notifs.push({id:a.id,type:'soon',rk,title:'Assignment overdue!',
+        sub:`${a.title} – ${c.name||a.course} was due ${Math.abs(d)} day${Math.abs(d)!==1?'s':''} ago.`,
+        icon:'🚨',soft:'#fff1f2',diff:d,read:isRead});
+    } else if(d<=7){
+      const when=d===0?'today':d===1?'tomorrow':`in ${d} days`;
+      notifs.push({id:a.id,type:'soon',rk,
+        title:d===0?'Due today!':d<=2?`Due ${when}`:`Upcoming: ${a.title}`,
+        sub:`${a.title} – ${c.name||a.course} is due ${when}.`,
+        icon:c.icon||'📋',soft:c.soft||'#ede9fe',diff:d,read:isRead});
     }
   });
-
-  // Sort: unread first, then by diff
-  notifs.sort((a,b) => (a.read - b.read) || (a.diff - b.diff));
-  return notifs;
+  return notifs.sort((a,b)=>(a.read-b.read)||(a.diff-b.diff));
 }
 
-function timeAgo(diff) {
-  if (diff <= 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  return `In ${diff} days`;
+function timeLabel(d){
+  if(d<0) return `${Math.abs(d)}d ago`;
+  if(d===0) return 'Today';
+  if(d===1) return 'Tomorrow';
+  return `In ${d}d`;
 }
 
-function setFilter(f, el) {
-  currentFilter = f;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+function setTab(t,el){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
   render();
 }
 
-function render() {
-  const all = buildNotifications();
-  const readIds = getRead();
-  const unreadCount = all.filter(n => !n.read).length;
-  document.getElementById('unreadLabel').textContent = `${unreadCount} unread reminder${unreadCount!==1?'s':''}`;
+function render(){
+  const all=buildNotifs();
+  const unread=all.filter(n=>!n.read);
+  document.getElementById('unreadSub').textContent=`${unread.length} unread reminder${unread.length!==1?'s':''}`;
+  const tu=document.getElementById('tabUnread');
+  tu.innerHTML=`Unread${unread.length?`<span class="cnt">${unread.length}</span>`:''}`;
 
-  let filtered = all;
-  if (currentFilter === 'unread')    filtered = all.filter(n => !n.read);
-  if (currentFilter === 'soon')      filtered = all.filter(n => n.type === 'soon');
-  if (currentFilter === 'completed') filtered = all.filter(n => n.type === 'completed');
+  let list=all;
+  if(currentTab==='unread') list=all.filter(n=>!n.read);
+  if(currentTab==='soon')   list=all.filter(n=>n.type==='soon');
+  if(currentTab==='done')   list=all.filter(n=>n.type==='done');
 
-  const list = document.getElementById('notifList');
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div>Nothing here!</div>`;
+  const el=document.getElementById('nList');
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:56px 20px;color:var(--text-muted);font-size:13.5px;"><div style="font-size:36px;margin-bottom:10px;">🎉</div>Nothing here!</div>';
     return;
   }
-
-  list.innerHTML = filtered.map(n => {
-    const readKey = n.type === 'completed' ? `done-${n.id}` : `soon-${n.id}`;
-    return `<div class="notif-item${n.read?'':' unread'}" id="notif-${readKey}">
-      <div class="notif-icon" style="background:${n.soft}">${n.icon}</div>
-      <div class="notif-body">
-        <div class="notif-title">${n.title}</div>
-        <div class="notif-sub">${n.sub}</div>
-        <div class="notif-actions">
+  el.innerHTML=list.map(n=>`
+    <div class="n-item${n.read?'':' unread'}">
+      <div class="n-icon" style="background:${n.soft}">${n.icon}</div>
+      <div class="n-body">
+        <div class="n-title">${n.title}</div>
+        <div class="n-sub">${n.sub}</div>
+        <div class="n-actions">
           <a class="btn btn-outline btn-sm" href="./calendar.html">View calendar</a>
-          <button class="btn btn-ghost btn-sm" onclick="dismiss('${readKey}')">Dismiss</button>
+          <button class="btn btn-ghost btn-sm" onclick="dismiss('${n.rk}')">Dismiss</button>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-        <span class="notif-time">${timeAgo(n.diff)}</span>
-        ${!n.read ? `<div class="notif-dot"></div>` : ''}
+      <div class="n-right">
+        <span class="n-time">${timeLabel(n.diff)}</span>
+        ${!n.read?'<div class="n-dot"></div>':''}
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-function dismiss(key) {
-  const r = getRead();
-  if (!r.includes(key)) r.push(key);
-  setRead(r);
-  render();
-}
-
-function markAllRead() {
-  const all = buildNotifications();
-  const r = getRead();
-  all.forEach(n => {
-    const key = n.type === 'completed' ? `done-${n.id}` : `soon-${n.id}`;
-    if (!r.includes(key)) r.push(key);
-  });
-  setRead(r);
-  render();
-}
+function dismiss(rk){ const r=getRead(); if(!r.includes(rk))r.push(rk); setRead(r); render(); }
+function markAllRead(){ const r=getRead(); buildNotifs().forEach(n=>{if(!r.includes(n.rk))r.push(n.rk);}); setRead(r); render(); showToast('All notifications marked as read'); }
 
 render();
 </script>

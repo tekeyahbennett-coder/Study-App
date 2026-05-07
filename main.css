@@ -6,93 +6,114 @@
 <title>CampusPlanner – Create Account</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-  body { font-family: 'Inter', sans-serif; }
-  .form-row { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
+.form-stack  { display:flex; flex-direction:column; gap:16px; margin-bottom:24px; }
+.form-row-2  { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.input-wrap  { position:relative; }
+.input-wrap .form-input { padding-left:42px; }
+.input-icon  { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text-muted);pointer-events:none; }
+.terms { font-size:12px;color:var(--text-muted);text-align:center;margin-top:14px;line-height:1.6; }
+.terms a { color:var(--primary);text-decoration:none; }
 </style>
 </head>
 <body class="auth-body">
-<div class="auth-card">
-  <div class="auth-logo">
-    <div class="logo-icon">📚</div>
-    <span>CampusPlanner</span>
+<div class="auth-left">
+  <div class="auth-brand">
+    <div class="logo-mark">📚</div>
+    <span class="auth-brand-name">CampusPlanner</span>
   </div>
-  <h1 class="auth-title">Create an account</h1>
-  <p class="auth-sub">Start organising your academic life for free</p>
-
-  <div class="form-row">
-    <div class="form-group">
-      <label class="form-label">Full name</label>
-      <input id="name" class="form-input" type="text" placeholder="Jane Doe">
-      <span class="form-error" id="nameErr">Please enter your name.</span>
-    </div>
-    <div class="form-group">
-      <label class="form-label">University email</label>
-      <input id="email" class="form-input" type="email" placeholder="you@university.edu">
-      <span class="form-error" id="emailErr">Please enter your email.</span>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input id="password" class="form-input" type="password" placeholder="••••••••">
-      <span class="form-error" id="passErr">Please enter a password.</span>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Confirm password</label>
-      <input id="confirm" class="form-input" type="password" placeholder="••••••••">
-      <span class="form-error" id="confirmErr">Passwords do not match.</span>
+  <div class="auth-hero">
+    <h1 class="auth-hero-title">Your academic<br><span>command center.</span></h1>
+    <p class="auth-hero-sub">Join students who use CampusPlanner to stay organised and stress-free all semester.</p>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="auth-feature-icon">✅</div><span class="auth-feature-text">Free forever — no credit card needed</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">⚡</div><span class="auth-feature-text">Set up in under 2 minutes</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">🔐</div><span class="auth-feature-text">Your data stays private in your browser</span></div>
     </div>
   </div>
-
-  <button class="btn btn-primary btn-full" onclick="createAccount()">Create account →</button>
-  <p class="auth-footer">Already have an account? <a href="./index.html">Sign in.</a></p>
+  <p class="auth-tagline">© 2026 CampusPlanner · Built for students</p>
 </div>
 
-<div class="toast success" id="toast">✅ Account created! Redirecting…</div>
+<div class="auth-right">
+  <div class="auth-form-wrap">
+    <a class="auth-back" href="./index.html">← Back to sign in</a>
+    <h1 class="auth-form-title">Create your account</h1>
+    <p class="auth-form-sub">Start organising your academic life — it's free.</p>
 
+    <div class="form-stack">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input id="name" class="form-input" type="text" placeholder="Jane Doe" oninput="ce('name','nameErr')">
+        </div>
+        <span class="form-error" id="nameErr">Please enter your full name.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">University email</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input id="email" class="form-input" type="email" placeholder="you@university.edu" oninput="ce('email','emailErr')">
+        </div>
+        <span class="form-error" id="emailErr">Please enter a valid email address.</span>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="password" class="form-input" type="password" placeholder="Min. 6 characters" oninput="ce('password','passErr')">
+          </div>
+          <span class="form-error" id="passErr">Password must be at least 6 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="confirm" class="form-input" type="password" placeholder="Repeat" oninput="ce('confirm','confirmErr')">
+          </div>
+          <span class="form-error" id="confirmErr">Passwords do not match.</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" onclick="createAccount()">Create account →</button>
+    <p class="terms">By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+    <p class="auth-footer-link" style="margin-top:16px;">Already have an account? <a href="./index.html">Sign in.</a></p>
+  </div>
+</div>
+<div class="toast success" id="toast">✅ Account created! Redirecting…</div>
 <script>
-function createAccount() {
-  const name    = document.getElementById('name').value.trim();
-  const email   = document.getElementById('email').value.trim();
-  const pass    = document.getElementById('password').value;
-  const confirm = document.getElementById('confirm').value;
-  const ids = ['name','email','password','confirm'];
-  const errs = ['nameErr','emailErr','passErr','confirmErr'];
-  ids.forEach(i => { document.getElementById(i).classList.remove('error'); });
-  errs.forEach(i => { document.getElementById(i).classList.remove('show'); });
-  let ok = true;
-  if (!name)  { flag('name','nameErr'); ok=false; }
-  if (!email) { flag('email','emailErr'); ok=false; }
-  if (!pass)  { flag('password','passErr'); ok=false; }
-  if (pass !== confirm) { flag('confirm','confirmErr'); ok=false; }
-  if (!ok) return;
-  seedData();
+function ce(i,e){ document.getElementById(i).classList.remove('error'); document.getElementById(e).classList.remove('show'); }
+function flag(i,e){ document.getElementById(i).classList.add('error'); document.getElementById(e).classList.add('show'); }
+function createAccount(){
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const pass=document.getElementById('password').value;
+  const conf=document.getElementById('confirm').value;
+  ['name','email','password','confirm'].forEach(id=>document.getElementById(id).classList.remove('error'));
+  ['nameErr','emailErr','passErr','confirmErr'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  let ok=true;
+  if(!name)               { flag('name','nameErr'); ok=false; }
+  if(!email||!email.includes('@')){ flag('email','emailErr'); ok=false; }
+  if(!pass||pass.length<6){ flag('password','passErr'); ok=false; }
+  if(pass!==conf)         { flag('confirm','confirmErr'); ok=false; }
+  if(!ok) return;
   localStorage.setItem('cp_user_name', name.split(' ')[0]);
-  showToast();
-  setTimeout(() => window.location.href = './dashboard.html', 900);
+  localStorage.setItem('cp_password', pass);
+  // Seed data
+  if(JSON.parse(localStorage.getItem('cp_assignments')||'[]').length===0){
+    const today=new Date();
+    const d=o=>{const x=new Date(today);x.setDate(x.getDate()+o);return x.toISOString().split('T')[0];};
+    localStorage.setItem('cp_assignments',JSON.stringify([
+      {id:1,title:'Research Paper',course:'psych',dueDate:d(6),reminder:'2',priority:'high',estHours:'4',notes:'',completed:false,createdAt:d(-5)},
+      {id:2,title:'Group Project',course:'cs',dueDate:d(4),reminder:'2',priority:'high',estHours:'6',notes:'',completed:false,createdAt:d(-5)},
+      {id:4,title:'Coding Project',course:'prog',dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'',completed:false,createdAt:d(-2)},
+    ]));
+  }
+  const t=document.getElementById('toast'); t.classList.add('show');
+  setTimeout(()=>window.location.href='./dashboard.html',900);
 }
-function flag(inputId, errId) {
-  document.getElementById(inputId).classList.add('error');
-  document.getElementById(errId).classList.add('show');
-}
-function showToast() {
-  const t = document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-function seedData() {
-  if (JSON.parse(localStorage.getItem('cp_assignments') || '[]').length > 0) return;
-  const today = new Date();
-  const d = (offset) => { const x = new Date(today); x.setDate(x.getDate()+offset); return x.toISOString().split('T')[0]; };
-  const seed = [
-    { id:1, title:'Research Paper',        course:'psych', dueDate:d(6),  reminder:'2', notes:'', completed:false, createdAt:d(-5) },
-    { id:2, title:'Group Project',         course:'cs',    dueDate:d(4),  reminder:'2', notes:'', completed:false, createdAt:d(-5) },
-    { id:3, title:'Lab Report',            course:'cs',    dueDate:d(-3), reminder:'2', notes:'', completed:true,  createdAt:d(-8) },
-    { id:4, title:'Coding Project',        course:'prog',  dueDate:d(12), reminder:'3', notes:'', completed:false, createdAt:d(-2) },
-    { id:5, title:'CS Midterm',            course:'cs',    dueDate:d(18), reminder:'7', notes:'', completed:false, createdAt:d(-2) },
-    { id:6, title:'Discrete HW',           course:'math',  dueDate:d(20), reminder:'2', notes:'', completed:false, createdAt:d(-1) },
-  ];
-  localStorage.setItem('cp_assignments', JSON.stringify(seed));
-}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')createAccount();});
 </script>
 </body>
 </html>

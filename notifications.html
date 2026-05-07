@@ -6,309 +6,186 @@
 <title>CampusPlanner – Reset Password</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-  body { font-family: 'Inter', sans-serif; }
-  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
-  .form-row { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .steps { display: flex; align-items: center; margin-bottom: 32px; }
-  .step-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #94a3b8; }
-  .step-item.active { color: var(--primary); }
-  .step-item.done   { color: #10b981; }
-  .step-circle {
-    width: 26px; height: 26px; border-radius: 50%;
-    border: 2px solid #e2e8f0; display: flex; align-items: center;
-    justify-content: center; font-size: 11px; font-weight: 700;
-    background: #fff; flex-shrink: 0;
-  }
-  .step-item.active .step-circle { border-color: var(--primary); color: var(--primary); }
-  .step-item.done   .step-circle { border-color: #10b981; background: #10b981; color: #fff; }
-  .step-line { flex: 1; height: 2px; background: #e2e8f0; margin: 0 8px; }
-  .step-line.done { background: #10b981; }
-  .code-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 8px; }
-  .code-box {
-    width: 46px; height: 54px; border: 2px solid var(--border);
-    border-radius: 10px; text-align: center; font-size: 22px; font-weight: 700;
-    font-family: 'Inter', monospace; color: var(--text);
-    background: var(--card); outline: none; transition: border .15s, box-shadow .15s;
-  }
-  .code-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
-  .code-box.error { border-color: #ef4444; }
-  .demo-hint {
-    background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
-    padding: 12px 14px; font-size: 13px; color: #0369a1;
-    margin-bottom: 20px; text-align: center; line-height: 1.8;
-  }
-  .demo-code { font-size: 22px; font-weight: 700; letter-spacing: .14em; color: var(--primary); display: block; margin-top: 4px; }
-  .success-screen { text-align: center; padding: 12px 0; }
-  .success-icon {
-    width: 64px; height: 64px; border-radius: 50%; background: #ecfdf5;
-    margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 28px;
-  }
-  .success-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .success-sub   { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
-  .strength-bar  { height: 4px; border-radius: 99px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
-  .strength-fill { height: 100%; border-radius: 99px; transition: width .3s, background .3s; width: 0%; }
-  .strength-label { font-size: 12px; margin-top: 4px; font-weight: 600; }
-  .back-link {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 13px; color: var(--text-muted); text-decoration: none; margin-bottom: 6px;
-  }
-  .back-link:hover { color: var(--text); }
-  .resend-row { text-align: center; margin-top: 14px; font-size: 13px; color: var(--text-muted); }
-  .resend-btn {
-    color: var(--primary); font-weight: 600; cursor: pointer;
-    background: none; border: none; font-size: 13px; font-family: inherit;
-  }
-  .resend-btn:hover { text-decoration: underline; }
+.form-stack { display:flex;flex-direction:column;gap:16px;margin-bottom:24px; }
+.steps { display:flex;align-items:center;margin-bottom:28px; }
+.step-item { display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#94a3b8; }
+.step-item.active { color:var(--primary); }
+.step-item.done   { color:#10b981; }
+.step-circle { width:26px;height:26px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#fff;flex-shrink:0; }
+.step-item.active .step-circle { border-color:var(--primary);color:var(--primary); }
+.step-item.done   .step-circle { border-color:#10b981;background:#10b981;color:#fff; }
+.step-line { flex:1;height:2px;background:#e2e8f0;margin:0 8px; }
+.step-line.done { background:#10b981; }
+.code-inputs { display:flex;gap:9px;justify-content:center;margin-bottom:6px; }
+.code-box { width:46px;height:52px;border:2px solid var(--border);border-radius:10px;text-align:center;font-size:22px;font-weight:700;font-family:'Inter',monospace;color:var(--text);background:var(--card);outline:none;transition:border .15s,box-shadow .15s; }
+.code-box:focus { border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,87,248,.12); }
+.code-box.error { border-color:var(--prog); }
+.demo-hint { background:#f0f9ff;border:1px solid #bae6fd;border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;color:#0369a1;margin-bottom:18px;text-align:center;line-height:1.8; }
+.demo-code { font-size:22px;font-weight:700;letter-spacing:.14em;color:var(--primary);display:block;margin-top:3px; }
+.strength-bar { height:4px;border-radius:99px;background:#e2e8f0;margin-top:7px;overflow:hidden; }
+.strength-fill { height:100%;border-radius:99px;transition:width .3s,background .3s;width:0%; }
+.strength-label { font-size:12px;margin-top:4px;font-weight:600; }
+.success-screen { text-align:center;padding:8px 0; }
+.success-icon { width:64px;height:64px;border-radius:50%;background:#ecfdf5;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px; }
+.success-title { font-size:22px;font-weight:700;margin-bottom:8px; }
+.success-sub   { font-size:14px;color:var(--text-muted);margin-bottom:28px;line-height:1.6; }
+.resend-row { text-align:center;margin-top:14px;font-size:13px;color:var(--text-muted); }
+.resend-btn { color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;font-size:13px;font-family:inherit; }
+.resend-btn:hover { text-decoration:underline; }
+.ce-row { font-size:12px;color:var(--prog);margin-bottom:10px;display:none;text-align:center; }
+.ce-row.show { display:block; }
 </style>
 </head>
 <body class="auth-body">
-<div class="auth-card">
-  <div class="auth-logo">
-    <div class="logo-icon">📚</div>
-    <span>CampusPlanner</span>
-  </div>
 
-  <!-- STEP 1: Email -->
-  <div id="step1">
-    <a class="back-link" href="./index.html">← Back to sign in</a>
-    <div class="steps">
-      <div class="step-item active"><div class="step-circle">1</div><span>Email</span></div>
-      <div class="step-line"></div>
-      <div class="step-item"><div class="step-circle">2</div><span>Verify</span></div>
-      <div class="step-line"></div>
-      <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
+<div class="auth-left">
+  <div class="auth-brand"><div class="logo-mark">📚</div><span class="auth-brand-name">CampusPlanner</span></div>
+  <div class="auth-hero">
+    <h1 class="auth-hero-title">Recover your<br><span>account access.</span></h1>
+    <p class="auth-hero-sub">Follow the steps to securely reset your password and get back to planning.</p>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="auth-feature-icon">🔒</div><span class="auth-feature-text">Verified 3-step reset process</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">⚡</div><span class="auth-feature-text">Takes less than 2 minutes</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">✅</div><span class="auth-feature-text">Your data is never lost</span></div>
     </div>
-    <h1 class="auth-title">Forgot password?</h1>
-    <p class="auth-sub">Enter your university email and we'll send you a 6-digit reset code.</p>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Email address</label>
-        <input id="resetEmail" class="form-input" type="email" placeholder="you@university.edu">
-        <span class="form-error" id="emailErr">Please enter a valid email address.</span>
+  </div>
+  <p class="auth-tagline">© 2026 CampusPlanner · Built for students</p>
+</div>
+
+<div class="auth-right">
+  <div class="auth-form-wrap">
+
+    <!-- STEP 1 -->
+    <div id="step1">
+      <a class="auth-back" href="./index.html">← Back to sign in</a>
+      <div class="steps">
+        <div class="step-item active"><div class="step-circle">1</div><span>Email</span></div>
+        <div class="step-line"></div>
+        <div class="step-item"><div class="step-circle">2</div><span>Verify</span></div>
+        <div class="step-line"></div>
+        <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
+      </div>
+      <h1 class="auth-form-title">Forgot password?</h1>
+      <p class="auth-form-sub">Enter your university email and we'll send a 6-digit reset code.</p>
+      <div class="form-stack">
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input id="resetEmail" class="form-input" type="email" placeholder="you@university.edu">
+          <span class="form-error" id="emailErr">Please enter a valid email address.</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="sendCode()">Send reset code →</button>
+      <p class="auth-footer-link">Remembered it? <a href="./index.html">Sign in.</a></p>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" style="display:none;">
+      <div class="steps">
+        <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
+        <div class="step-line done"></div>
+        <div class="step-item active"><div class="step-circle">2</div><span>Verify</span></div>
+        <div class="step-line"></div>
+        <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
+      </div>
+      <h1 class="auth-form-title">Check your email</h1>
+      <p class="auth-form-sub" id="codeSentMsg"></p>
+      <div class="demo-hint">🔔 Demo mode — no email is sent. Your reset code is:<span class="demo-code" id="displayCode"></span></div>
+      <div class="code-inputs">
+        <input class="code-box" id="c0" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(0)" onkeydown="codeBack(0,event)">
+        <input class="code-box" id="c1" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(1)" onkeydown="codeBack(1,event)">
+        <input class="code-box" id="c2" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(2)" onkeydown="codeBack(2,event)">
+        <input class="code-box" id="c3" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(3)" onkeydown="codeBack(3,event)">
+        <input class="code-box" id="c4" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(4)" onkeydown="codeBack(4,event)">
+        <input class="code-box" id="c5" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(5)" onkeydown="codeBack(5,event)">
+      </div>
+      <div class="ce-row" id="codeErr">Incorrect code. Please try again.</div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="verifyCode()" style="margin-top:8px;">Verify code →</button>
+      <div class="resend-row">Didn't receive it? <button class="resend-btn" id="resendBtn" onclick="resendCode()">Resend</button><span id="resendTimer" style="display:none;color:#94a3b8;"></span></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" style="display:none;">
+      <div class="steps">
+        <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
+        <div class="step-line done"></div>
+        <div class="step-item done"><div class="step-circle">✓</div><span>Verify</span></div>
+        <div class="step-line done"></div>
+        <div class="step-item active"><div class="step-circle">3</div><span>Reset</span></div>
+      </div>
+      <h1 class="auth-form-title">Set new password</h1>
+      <p class="auth-form-sub">Choose a strong password for your account.</p>
+      <div class="form-stack">
+        <div class="form-group">
+          <label class="form-label">New password</label>
+          <input id="newPass" class="form-input" type="password" placeholder="••••••••" oninput="checkStrength()">
+          <div class="strength-bar"><div class="strength-fill" id="sFill"></div></div>
+          <span class="strength-label" id="sLabel"></span>
+          <span class="form-error" id="newPassErr">Password must be at least 6 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm new password</label>
+          <input id="confirmPass" class="form-input" type="password" placeholder="••••••••" oninput="clearConfErr()">
+          <span class="form-error" id="confirmErr">Passwords do not match.</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="resetPassword()">Reset password →</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="stepSuccess" style="display:none;">
+      <div class="success-screen">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Password reset!</div>
+        <div class="success-sub">Your password has been updated successfully.<br>You can now sign in with your new password.</div>
+        <a class="btn btn-primary btn-full btn-lg" href="./index.html">Back to sign in →</a>
       </div>
     </div>
-    <button class="btn btn-primary btn-full" onclick="sendCode()">Send reset code →</button>
-    <p class="auth-footer">Remembered it? <a href="./index.html">Sign in.</a></p>
-  </div>
 
-  <!-- STEP 2: Verify Code -->
-  <div id="step2" style="display:none;">
-    <div class="steps">
-      <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
-      <div class="step-line done"></div>
-      <div class="step-item active"><div class="step-circle">2</div><span>Verify</span></div>
-      <div class="step-line"></div>
-      <div class="step-item"><div class="step-circle">3</div><span>Reset</span></div>
-    </div>
-    <h1 class="auth-title">Check your email</h1>
-    <p class="auth-sub" id="codeSentMsg">We sent a 6-digit code to your email.</p>
-    <div class="demo-hint">
-      🔔 Demo mode – no real email is sent.<br>Your reset code is:
-      <span class="demo-code" id="displayCode"></span>
-    </div>
-    <div class="code-inputs">
-      <input class="code-box" id="c0" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(0)" onkeydown="codeBack(0,event)">
-      <input class="code-box" id="c1" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(1)" onkeydown="codeBack(1,event)">
-      <input class="code-box" id="c2" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(2)" onkeydown="codeBack(2,event)">
-      <input class="code-box" id="c3" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(3)" onkeydown="codeBack(3,event)">
-      <input class="code-box" id="c4" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(4)" onkeydown="codeBack(4,event)">
-      <input class="code-box" id="c5" maxlength="1" type="text" inputmode="numeric" oninput="codeInput(5)" onkeydown="codeBack(5,event)">
-    </div>
-    <span class="form-error" id="codeErr" style="display:block;text-align:center;min-height:18px;margin-bottom:12px;"></span>
-    <button class="btn btn-primary btn-full" onclick="verifyCode()">Verify code →</button>
-    <div class="resend-row">
-      Didn't get it?
-      <button class="resend-btn" id="resendBtn" onclick="resendCode()">Resend code</button>
-      <span id="resendTimer" style="display:none;color:#94a3b8;"></span>
-    </div>
-  </div>
-
-  <!-- STEP 3: New Password -->
-  <div id="step3" style="display:none;">
-    <div class="steps">
-      <div class="step-item done"><div class="step-circle">✓</div><span>Email</span></div>
-      <div class="step-line done"></div>
-      <div class="step-item done"><div class="step-circle">✓</div><span>Verify</span></div>
-      <div class="step-line done"></div>
-      <div class="step-item active"><div class="step-circle">3</div><span>Reset</span></div>
-    </div>
-    <h1 class="auth-title">Set new password</h1>
-    <p class="auth-sub">Choose a strong password for your account.</p>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">New password</label>
-        <input id="newPass" class="form-input" type="password" placeholder="••••••••" oninput="checkStrength()">
-        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-        <span class="strength-label" id="strengthLabel"></span>
-        <span class="form-error" id="newPassErr">Please enter a new password (min. 6 characters).</span>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Confirm new password</label>
-        <input id="confirmPass" class="form-input" type="password" placeholder="••••••••" oninput="clearConfirmErr()">
-        <span class="form-error" id="confirmErr">Passwords do not match.</span>
-      </div>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="resetPassword()">Reset password →</button>
-  </div>
-
-  <!-- SUCCESS -->
-  <div id="stepSuccess" style="display:none;">
-    <div class="success-screen">
-      <div class="success-icon">✅</div>
-      <div class="success-title">Password reset!</div>
-      <div class="success-sub">Your password has been updated successfully.<br>You can now sign in with your new password.</div>
-      <a class="btn btn-primary btn-full" href="./index.html">Back to sign in →</a>
-    </div>
   </div>
 </div>
 
 <div class="toast success" id="toast"></div>
 
 <script>
-let generatedCode = '';
-let resendInterval = null;
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// Step 1
-function sendCode() {
-  const email = document.getElementById('resetEmail').value.trim();
+let code='', resendIv=null;
+function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.className='toast success show';setTimeout(()=>t.classList.remove('show'),2500); }
+function sendCode(){
+  const email=document.getElementById('resetEmail').value.trim();
   document.getElementById('emailErr').classList.remove('show');
   document.getElementById('resetEmail').classList.remove('error');
-  if (!email || !email.includes('@')) {
-    document.getElementById('resetEmail').classList.add('error');
-    document.getElementById('emailErr').classList.add('show');
-    return;
-  }
-  generatedCode = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById('displayCode').textContent = generatedCode;
-  document.getElementById('codeSentMsg').textContent = `We sent a 6-digit code to ${email}.`;
-  document.getElementById('step1').style.display = 'none';
-  document.getElementById('step2').style.display = 'block';
-  setTimeout(() => document.getElementById('c0').focus(), 100);
-  startResendTimer();
+  if(!email||!email.includes('@')){ document.getElementById('resetEmail').classList.add('error');document.getElementById('emailErr').classList.add('show');return; }
+  code=String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('displayCode').textContent=code;
+  document.getElementById('codeSentMsg').textContent=`A reset code was sent to ${email}.`;
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  setTimeout(()=>document.getElementById('c0').focus(),100);
+  startTimer();
 }
-
-// Step 2 – code boxes
-function codeInput(i) {
-  const box = document.getElementById(`c${i}`);
-  box.value = box.value.replace(/\D/g, '');
-  document.getElementById('codeErr').textContent = '';
-  document.querySelectorAll('.code-box').forEach(b => b.classList.remove('error'));
-  if (box.value && i < 5) document.getElementById(`c${i+1}`).focus();
-  const full = Array.from({length:6}, (_,j) => document.getElementById(`c${j}`).value).join('');
-  if (full.length === 6) setTimeout(verifyCode, 200);
+function codeInput(i){
+  const b=document.getElementById(`c${i}`);
+  b.value=b.value.replace(/\D/g,'');
+  document.getElementById('codeErr').classList.remove('show');
+  document.querySelectorAll('.code-box').forEach(x=>x.classList.remove('error'));
+  if(b.value&&i<5) document.getElementById(`c${i+1}`).focus();
+  const full=Array.from({length:6},(_,j)=>document.getElementById(`c${j}`).value).join('');
+  if(full.length===6) setTimeout(verifyCode,200);
 }
-
-function codeBack(i, e) {
-  if (e.key === 'Backspace' && !document.getElementById(`c${i}`).value && i > 0) {
-    document.getElementById(`c${i-1}`).focus();
-  }
+function codeBack(i,e){ if(e.key==='Backspace'&&!document.getElementById(`c${i}`).value&&i>0) document.getElementById(`c${i-1}`).focus(); }
+function verifyCode(){
+  const entered=Array.from({length:6},(_,i)=>document.getElementById(`c${i}`).value).join('');
+  if(entered.length<6){ document.getElementById('codeErr').classList.add('show');return; }
+  if(entered!==code){ document.getElementById('codeErr').classList.add('show');document.querySelectorAll('.code-box').forEach(b=>b.classList.add('error'));Array.from({length:6},(_,i)=>{document.getElementById(`c${i}`).value='';});document.getElementById('c0').focus();return; }
+  clearInterval(resendIv);
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step3').style.display='block';
+  setTimeout(()=>document.getElementById('newPass').focus(),100);
 }
-
-function verifyCode() {
-  const entered = Array.from({length:6}, (_,i) => document.getElementById(`c${i}`).value).join('');
-  const errEl = document.getElementById('codeErr');
-  if (entered.length < 6) { errEl.textContent = 'Please enter all 6 digits.'; errEl.classList.add('show'); return; }
-  if (entered !== generatedCode) {
-    errEl.textContent = 'Incorrect code. Please try again.';
-    errEl.classList.add('show');
-    document.querySelectorAll('.code-box').forEach(b => b.classList.add('error'));
-    Array.from({length:6}, (_,i) => { document.getElementById(`c${i}`).value = ''; });
-    document.getElementById('c0').focus();
-    return;
-  }
-  clearInterval(resendInterval);
-  document.getElementById('step2').style.display = 'none';
-  document.getElementById('step3').style.display = 'block';
-  setTimeout(() => document.getElementById('newPass').focus(), 100);
-}
-
-function resendCode() {
-  generatedCode = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById('displayCode').textContent = generatedCode;
-  Array.from({length:6}, (_,i) => { document.getElementById(`c${i}`).value = ''; });
-  document.getElementById('codeErr').textContent = '';
-  document.querySelectorAll('.code-box').forEach(b => b.classList.remove('error'));
-  document.getElementById('c0').focus();
-  showToast('New code generated!');
-  startResendTimer();
-}
-
-function startResendTimer() {
-  let secs = 30;
-  const btn = document.getElementById('resendBtn');
-  const timer = document.getElementById('resendTimer');
-  btn.style.display = 'none';
-  timer.style.display = 'inline';
-  clearInterval(resendInterval);
-  resendInterval = setInterval(() => {
-    timer.textContent = `Resend in ${secs}s`;
-    secs--;
-    if (secs < 0) {
-      clearInterval(resendInterval);
-      timer.style.display = 'none';
-      btn.style.display = 'inline';
-    }
-  }, 1000);
-}
-
-// Step 3 – password strength
-function checkStrength() {
-  const p = document.getElementById('newPass').value;
-  document.getElementById('newPassErr').classList.remove('show');
-  document.getElementById('newPass').classList.remove('error');
-  let score = 0;
-  if (p.length >= 8)           score++;
-  if (/[A-Z]/.test(p))         score++;
-  if (/[0-9]/.test(p))         score++;
-  if (/[^A-Za-z0-9]/.test(p)) score++;
-  const cfg = [
-    { w:'0%',   c:'#e2e8f0', t:'' },
-    { w:'25%',  c:'#ef4444', t:'Weak' },
-    { w:'50%',  c:'#f59e0b', t:'Fair' },
-    { w:'75%',  c:'#6366f1', t:'Good' },
-    { w:'100%', c:'#10b981', t:'Strong' },
-  ][score];
-  document.getElementById('strengthFill').style.width      = cfg.w;
-  document.getElementById('strengthFill').style.background = cfg.c;
-  document.getElementById('strengthLabel').textContent     = cfg.t;
-  document.getElementById('strengthLabel').style.color     = cfg.c;
-}
-
-function clearConfirmErr() {
-  document.getElementById('confirmErr').classList.remove('show');
-  document.getElementById('confirmPass').classList.remove('error');
-}
-
-function resetPassword() {
-  const p1 = document.getElementById('newPass').value;
-  const p2 = document.getElementById('confirmPass').value;
-  document.getElementById('newPassErr').classList.remove('show');
-  document.getElementById('confirmErr').classList.remove('show');
-  document.getElementById('newPass').classList.remove('error');
-  document.getElementById('confirmPass').classList.remove('error');
-  let ok = true;
-  if (!p1 || p1.length < 6) {
-    document.getElementById('newPass').classList.add('error');
-    document.getElementById('newPassErr').classList.add('show');
-    ok = false;
-  }
-  if (p1 !== p2) {
-    document.getElementById('confirmPass').classList.add('error');
-    document.getElementById('confirmErr').classList.add('show');
-    ok = false;
-  }
-  if (!ok) return;
-  localStorage.setItem('cp_password', p1);
-  document.getElementById('step3').style.display = 'none';
-  document.getElementById('stepSuccess').style.display = 'block';
-}
+function resendCode(){ code=String(Math.floor(100000+Math.random()*900000));document.getElementById('displayCode').textContent=code;Array.from({length:6},(_,i)=>{document.getElementById(`c${i}`).value='';});document.getElementById('codeErr').classList.remove('show');document.querySelectorAll('.code-box').forEach(b=>b.classList.remove('error'));document.getElementById('c0').focus();showToast('New code generated!');startTimer(); }
+function startTimer(){ let s=30;const btn=document.getElementById('resendBtn'),tmr=document.getElementById('resendTimer');btn.style.display='none';tmr.style.display='inline';clearInterval(resendIv);resendIv=setInterval(()=>{tmr.textContent=`Resend in ${s}s`;s--;if(s<0){clearInterval(resendIv);tmr.style.display='none';btn.style.display='inline';}},1000); }
+function checkStrength(){ const p=document.getElementById('newPass').value;document.getElementById('newPassErr').classList.remove('show');document.getElementById('newPass').classList.remove('error');let sc=0;if(p.length>=8)sc++;if(/[A-Z]/.test(p))sc++;if(/[0-9]/.test(p))sc++;if(/[^A-Za-z0-9]/.test(p))sc++;const cfg=[{w:'0%',c:'#e2e8f0',t:''},{w:'25%',c:'#f43f5e',t:'Weak'},{w:'50%',c:'#f59e0b',t:'Fair'},{w:'75%',c:'#6d57f8',t:'Good'},{w:'100%',c:'#10b981',t:'Strong'}][sc];document.getElementById('sFill').style.width=cfg.w;document.getElementById('sFill').style.background=cfg.c;document.getElementById('sLabel').textContent=cfg.t;document.getElementById('sLabel').style.color=cfg.c; }
+function clearConfErr(){ document.getElementById('confirmErr').classList.remove('show');document.getElementById('confirmPass').classList.remove('error'); }
+function resetPassword(){ const p1=document.getElementById('newPass').value,p2=document.getElementById('confirmPass').value;document.getElementById('newPassErr').classList.remove('show');document.getElementById('confirmErr').classList.remove('show');document.getElementById('newPass').classList.remove('error');document.getElementById('confirmPass').classList.remove('error');let ok=true;if(!p1||p1.length<6){document.getElementById('newPass').classList.add('error');document.getElementById('newPassErr').classList.add('show');ok=false;}if(p1!==p2){document.getElementById('confirmPass').classList.add('error');document.getElementById('confirmErr').classList.add('show');ok=false;}if(!ok)return;localStorage.setItem('cp_password',p1);document.getElementById('step3').style.display='none';document.getElementById('stepSuccess').style.display='block'; }
 </script>
 </body>
 </html>

@@ -1,323 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CampusPlanner – Course</title>
-<link rel="stylesheet" href="./main.css">
-<style>
-.course-hero {
-  border-radius: var(--radius); padding: 28px 32px;
-  display: flex; align-items: center; gap: 20px;
-  color: #fff; margin-bottom: 4px;
-}
-.course-hero-icon {
-  width: 56px; height: 56px; border-radius: 14px;
-  background: rgba(255,255,255,.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; flex-shrink: 0;
-}
-.hero-title { font-size: 22px; font-weight: 700; }
-.hero-sub   { font-size: 14px; opacity: .8; margin-top: 3px; }
+// shared.js — sidebar builder, data layer, utilities
+// Used by all app pages (dashboard, calendar, addAssignment, notifications, course)
 
-.stat-row {
-  display: flex; gap: 14px; flex-wrap: wrap;
-}
-.mini-stat {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px 22px;
-  flex: 1; min-width: 120px;
-}
-.mini-num { font-size: 26px; font-weight: 700; }
-.mini-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-.section-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .07em;
-  text-transform: uppercase; color: var(--text-muted);
-  padding: 14px 22px 6px;
-}
-.section-label.overdue { color: #ef4444; }
-.section-label.upcoming { color: var(--text-muted); }
-.section-label.done { color: #94a3b8; }
-
-.a-row {
-  display: flex; align-items: center; gap: 14px;
-  padding: 13px 22px; border-bottom: 1px solid var(--border);
-  transition: background .12s; cursor: pointer;
-}
-.a-row:last-child { border-bottom: none; }
-.a-row:hover { background: var(--bg); }
-
-.check-circle {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .15s;
-}
-.check-circle:hover { border-color: var(--primary); }
-.check-circle.done { background: #10b981; border-color: #10b981; }
-.check-circle.done::after { content:'✓'; color:#fff; font-size:11px; font-weight:700; }
-
-.a-title { font-size: 14px; font-weight: 600; }
-.a-title.overdue  { color: #ef4444; }
-.a-title.done-txt { color: #94a3b8; text-decoration: line-through; }
-.a-title.upcoming { color: var(--text); }
-
-.a-due { font-size: 12px; margin-top: 2px; }
-.a-due.overdue  { color: #ef4444; font-weight: 600; }
-.a-due.done-txt { color: #94a3b8; }
-.a-due.upcoming { color: var(--text-muted); }
-
-.pill {
-  font-size: 11px; font-weight: 600; padding: 3px 9px;
-  border-radius: 99px; white-space: nowrap; flex-shrink: 0;
-}
-.pill-overdue  { background: #fef2f2; color: #ef4444; }
-.pill-upcoming { background: #eef2ff; color: #6366f1; }
-.pill-done     { background: #f1f5f9; color: #94a3b8; }
-.pill-today    { background: #fef3c7; color: #b45309; }
-.pill-priority-high { background: #fef2f2; color: #ef4444; }
-.pill-priority-medium { background: #fffbeb; color: #b45309; }
-.pill-priority-low { background: #ecfdf5; color: #10b981; }
-
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--text-muted); font-size: 14px;
-}
-.empty-icon { font-size: 40px; margin-bottom: 10px; }
-.notes-text { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-style: italic; }
-</style>
-</head>
-<body>
-<div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">📚</div>
-    <span>CampusPlanner</span>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Navigation</div>
-    <a class="nav-item" href="./dashboard.html"><span class="ni">🏠</span> Dashboard</a>
-    <a class="nav-item" href="./calendar.html"><span class="ni">📅</span> Calendar</a>
-    <a class="nav-item" href="./addAssignment.html"><span class="ni">➕</span> Add Assignment</a>
-    <a class="nav-item" href="./notifications.html"><span class="ni">🔔</span> Notifications</a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Courses</div>
-    <a class="nav-item" id="nav-cs"    href="./course.html?course=cs">   <span class="course-dot" style="background:var(--cs)"></span>   Computer Science</a>
-    <a class="nav-item" id="nav-prog"  href="./course.html?course=prog"> <span class="course-dot" style="background:var(--prog)"></span>  Programming</a>
-    <a class="nav-item" id="nav-psych" href="./course.html?course=psych"><span class="course-dot" style="background:var(--psych)"></span> Psychology</a>
-    <a class="nav-item" id="nav-math"  href="./course.html?course=math"> <span class="course-dot" style="background:var(--math)"></span>  Discrete Math</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="profile-block">
-      <div class="avatar">JD</div>
-      <div>
-        <div class="profile-name">John Doe</div>
-        <div class="profile-sub">Junior • CS Major</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="main">
-  <div id="pageContent">
-    <div class="empty-state"><div class="empty-icon">⏳</div>Loading…</div>
-  </div>
-</div>
-
-<div class="toast success" id="toast"></div>
-
-<script>
 const COURSES = {
-  cs:    { name:'Computer Science', color:'#6366f1', soft:'#eef2ff', icon:'📘', grad:'linear-gradient(135deg,#6366f1,#4f46e5)' },
-  prog:  { name:'Programming',      color:'#ef4444', soft:'#fef2f2', icon:'💻', grad:'linear-gradient(135deg,#ef4444,#dc2626)' },
-  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠', grad:'linear-gradient(135deg,#f59e0b,#d97706)' },
-  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#059669)' },
+  cs:    { name:'Computer Science', color:'#6d57f8', soft:'#ede9fe', icon:'📘', grad:'linear-gradient(135deg,#6d57f8,#8b78ff)' },
+  prog:  { name:'Programming',      color:'#f43f5e', soft:'#fff1f2', icon:'💻', grad:'linear-gradient(135deg,#f43f5e,#fb7185)' },
+  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠', grad:'linear-gradient(135deg,#f59e0b,#fbbf24)' },
+  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
 };
 
-function getAssignments() { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
+// ── Data layer ────────────────────────────────────────────────
+function getAssignments()     { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
 function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
+function getUserName()        { return localStorage.getItem('cp_user_name') || 'John'; }
 
-function getParam(key) {
-  return new URLSearchParams(window.location.search).get(key);
-}
-
-function formatDate(str) {
-  const d = new Date(str + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-}
-
-function diffDays(dateStr) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const due   = new Date(dateStr + 'T00:00:00');
-  return Math.ceil((due - today) / 86400000);
-}
-
-function render() {
-  const courseKey = getParam('course');
-  const c = COURSES[courseKey];
-
-  // Highlight active course in sidebar
-  const navEl = document.getElementById(`nav-${courseKey}`);
-  if (navEl) navEl.classList.add('active');
-
-  if (!c) {
-    document.getElementById('pageContent').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">❓</div>Course not found.</div>`;
-    return;
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
   }
-
-  document.title = `CampusPlanner – ${c.name}`;
-
-  const all = getAssignments().filter(a => a.course === courseKey);
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  // Categorise
-  const overdue  = all.filter(a => !a.completed && diffDays(a.dueDate) < 0)
-                      .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
-  const upcoming = all.filter(a => !a.completed && diffDays(a.dueDate) >= 0)
-                      .sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
-  const done     = all.filter(a => a.completed)
-                      .sort((a,b) => new Date(b.dueDate) - new Date(a.dueDate));
-
-  const totalActive = overdue.length + upcoming.length;
-
-  // Build HTML
-  let html = `
-    <div class="page-header" style="margin-bottom:0;">
-      <div>
-        <a href="./dashboard.html" style="font-size:13px;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;">← Back to Dashboard</a>
-        <h1 class="page-title">${c.name}</h1>
-        <p class="page-sub">${all.length} total assignment${all.length!==1?'s':''}</p>
-      </div>
-      <a class="btn btn-primary" href="./addAssignment.html">+ Add Assignment</a>
-    </div>
-
-    <!-- Hero banner -->
-    <div class="course-hero" style="background:${c.grad};">
-      <div class="course-hero-icon">${c.icon}</div>
-      <div>
-        <div class="hero-title">${c.name}</div>
-        <div class="hero-sub">${totalActive} active · ${done.length} completed · ${overdue.length} overdue</div>
-      </div>
-    </div>
-
-    <!-- Mini stats -->
-    <div class="stat-row">
-      <div class="mini-stat">
-        <div class="mini-num">${upcoming.length}</div>
-        <div class="mini-lbl">Upcoming</div>
-      </div>
-      <div class="mini-stat">
-        <div class="mini-num" style="color:${overdue.length>0?'#ef4444':'inherit'}">${overdue.length}</div>
-        <div class="mini-lbl">Overdue</div>
-      </div>
-      <div class="mini-stat">
-        <div class="mini-num">${done.length}</div>
-        <div class="mini-lbl">Completed</div>
-      </div>
-      <div class="mini-stat">
-        <div class="mini-num">${all.length}</div>
-        <div class="mini-lbl">Total</div>
-      </div>
-    </div>
-
-    <div class="card">`;
-
-  if (all.length === 0) {
-    html += `<div class="empty-state"><div class="empty-icon">📭</div>No assignments for this course yet.<br><a href="./addAssignment.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;">+ Add one now</a></div>`;
-  } else {
-    // OVERDUE section
-    if (overdue.length > 0) {
-      html += `<div class="section-label overdue">⚠ Overdue (${overdue.length})</div>`;
-      html += overdue.map(a => buildRow(a, 'overdue')).join('');
-    }
-
-    // UPCOMING section
-    if (upcoming.length > 0) {
-      html += `<div class="section-label upcoming">Upcoming (${upcoming.length})</div>`;
-      html += upcoming.map(a => buildRow(a, 'upcoming')).join('');
-    }
-
-    // COMPLETED section
-    if (done.length > 0) {
-      html += `<div class="section-label done">Completed (${done.length})</div>`;
-      html += done.map(a => buildRow(a, 'done')).join('');
-    }
-  }
-
-  html += `</div>`;
-  document.getElementById('pageContent').innerHTML = html;
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-function buildRow(a, type) {
-  const diff = diffDays(a.dueDate);
-  let titleCls, dueCls, pillHtml, dueLabel;
-
-  if (type === 'overdue') {
-    titleCls = 'overdue';
-    dueCls   = 'overdue';
-    dueLabel = `Was due ${formatDate(a.dueDate)} · ${Math.abs(diff)} day${Math.abs(diff)!==1?'s':''} ago`;
-    pillHtml = `<span class="pill pill-overdue">Overdue</span>`;
-  } else if (type === 'done') {
-    titleCls = 'done-txt';
-    dueCls   = 'done-txt';
-    dueLabel = `Due ${formatDate(a.dueDate)}`;
-    pillHtml = `<span class="pill pill-done">Completed</span>`;
-  } else {
-    titleCls = 'upcoming';
-    dueCls   = 'upcoming';
-    if (diff === 0)      dueLabel = 'Due today';
-    else if (diff === 1) dueLabel = 'Due tomorrow';
-    else                 dueLabel = `Due ${formatDate(a.dueDate)} · in ${diff} days`;
-
-    if (diff === 0)       pillHtml = `<span class="pill pill-today">Today</span>`;
-    else if (diff <= 3)   pillHtml = `<span class="pill pill-upcoming">Soon</span>`;
-    else                  pillHtml = '';
-  }
-
-  const priorityPill = a.priority && a.priority !== 'medium' && type !== 'done'
-    ? `<span class="pill pill-priority-${a.priority}" style="margin-left:4px;">${a.priority.charAt(0).toUpperCase()+a.priority.slice(1)}</span>`
-    : '';
-
-  const notesHtml = a.notes
-    ? `<div class="notes-text">${a.notes}</div>` : '';
-
-  const doneCls = type === 'done' ? ' done' : '';
-
-  return `<div class="a-row">
-    <div class="check-circle${doneCls}" onclick="toggleDone(${a.id})"></div>
-    <div style="flex:1;min-width:0;">
-      <div class="a-title ${titleCls}">${a.title}</div>
-      <div class="a-due ${dueCls}">${dueLabel}</div>
-      ${notesHtml}
-    </div>
-    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-      ${pillHtml}${priorityPill}
-    </div>
-  </div>`;
+// ── Seed data (runs if localStorage is empty) ────────────────
+function seedIfEmpty() {
+  if (getAssignments().length > 0) return;
+  const today = new Date();
+  const d = o => { const x = new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  saveAssignments([
+    {id:1,title:'Research Paper',        course:'psych',dueDate:d(6), reminder:'2',priority:'high',  estHours:'4',notes:'Manifest Destiny essay – 8 pages',  completed:false,createdAt:d(-5)},
+    {id:2,title:'Group Project',         course:'cs',   dueDate:d(4), reminder:'2',priority:'high',  estHours:'6',notes:'HCI prototype demo',                 completed:false,createdAt:d(-5)},
+    {id:3,title:'Lab Report',            course:'cs',   dueDate:d(-3),reminder:'2',priority:'medium',estHours:'2',notes:'Already submitted',                  completed:true, createdAt:d(-8)},
+    {id:4,title:'Coding Project',        course:'prog', dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'Nested loops chapter',               completed:false,createdAt:d(-2)},
+    {id:5,title:'CS Midterm',            course:'cs',   dueDate:d(18),reminder:'7',priority:'high',  estHours:'8',notes:'Study chapters 1–6',                 completed:false,createdAt:d(-2)},
+    {id:6,title:'Discrete HW',           course:'math', dueDate:d(20),reminder:'2',priority:'low',   estHours:'2',notes:'Problem set 4',                      completed:false,createdAt:d(-1)},
+    {id:7,title:'Psychology Quiz',       course:'psych',dueDate:d(13),reminder:'1',priority:'medium',estHours:'1',notes:'',                                   completed:false,createdAt:d(-1)},
+    {id:8,title:'Prog. Assignment 3',    course:'prog', dueDate:d(22),reminder:'2',priority:'medium',estHours:'3',notes:'Recursion exercises',                 completed:false,createdAt:d(0)},
+  ]);
 }
 
-function toggleDone(id) {
+// ── Delete assignment ────────────────────────────────────────
+function deleteAssignment(id, callback) {
+  if (!confirm('Delete this assignment? This cannot be undone.')) return;
+  const arr = getAssignments().filter(a => a.id !== id);
+  saveAssignments(arr);
+  showToast('🗑 Assignment deleted');
+  if (callback) callback();
+}
+
+// ── Toggle complete ──────────────────────────────────────────
+function toggleComplete(id, callback) {
   const arr = getAssignments();
   const a = arr.find(x => x.id === id);
   if (!a) return;
   a.completed = !a.completed;
   saveAssignments(arr);
-
-  const msg = a.completed ? '✅ Marked as complete!' : '↩ Marked as incomplete';
-  showToast(msg);
-  render();
+  showToast(a.completed ? '✅ Marked complete!' : '↩ Marked incomplete');
+  if (callback) callback();
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+// ── Format date ──────────────────────────────────────────────
+function fmtDate(str) {
+  return new Date(str + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
 }
 
-render();
-</script>
-</body>
-</html>
+function diffDays(str) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((new Date(str + 'T00:00:00') - t) / 86400000);
+}
+
+// ── Sidebar builder ──────────────────────────────────────────
+function buildSidebar(activePage) {
+  const name     = getUserName();
+  const initials = name.substring(0, 2).toUpperCase();
+
+  const courseLinks = Object.entries(COURSES).map(([key, c]) =>
+    `<a class="nav-link${activePage === 'course-' + key ? ' active' : ''}"
+        href="./course.html?course=${key}">
+       <span class="course-pip" style="background:${c.color}"></span>
+       <span>${c.name}</span>
+     </a>`
+  ).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">📚</div>
+      <span class="logo-name">CampusPlanner</span>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Menu</div>
+      <a class="nav-link${activePage==='dashboard'      ?' active':''}" href="./dashboard.html">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a class="nav-link${activePage==='calendar'       ?' active':''}" href="./calendar.html">
+        <span class="icon">📅</span><span>Calendar</span>
+      </a>
+      <a class="nav-link${activePage==='add'            ?' active':''}" href="./addAssignment.html">
+        <span class="icon">➕</span><span>Add Assignment</span>
+      </a>
+      <a class="nav-link${activePage==='notifications'  ?' active':''}" href="./notifications.html">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Courses</div>
+      ${courseLinks}
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="profile-row">
+        <div class="avatar-circle">${initials}</div>
+        <div>
+          <div class="profile-name">${name} Doe</div>
+          <div class="profile-sub">Junior · CS Major</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}

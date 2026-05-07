@@ -6,243 +6,307 @@
 <title>CampusPlanner – Dashboard</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-.stat-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-}
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
 .stat-card {
-  background: var(--card); border-radius: var(--radius);
-  border: 1px solid var(--border); padding: 20px 22px;
-  display: flex; align-items: center; gap: 16px;
+  background:var(--card); border-radius:var(--radius); border:1px solid var(--border);
+  padding:20px 22px; display:flex; align-items:center; gap:16px;
+  box-shadow:var(--shadow-sm); transition:box-shadow .2s,transform .2s; cursor:default;
 }
-.stat-icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
+.stat-card:hover { box-shadow:var(--shadow); transform:translateY(-1px); }
+.stat-icon { width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
+.stat-num  { font-size:28px;font-weight:800;line-height:1;letter-spacing:-.02em; }
+.stat-lbl  { font-size:12.5px;color:var(--text-muted);margin-top:3px;font-weight:500; }
+.content-grid { display:grid; grid-template-columns:1fr 300px; gap:18px; }
+.a-item { display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border-light);transition:background .12s; }
+.a-item:last-child { border-bottom:none; }
+.a-item:hover { background:#fafbff; }
+.check-btn { width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
+.check-btn:hover  { border-color:var(--primary);background:var(--primary-soft); }
+.check-btn.done   { background:var(--math);border-color:var(--math); }
+.check-btn.done::after { content:'✓';color:#fff;font-size:11px;font-weight:700; }
+.a-name { font-size:13.5px;font-weight:600; }
+.a-name.done { text-decoration:line-through;color:var(--text-muted); }
+.a-meta { display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap; }
+.due-chip { font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px; }
+.due-chip.urgent  { background:#fff1f2;color:var(--prog); }
+.due-chip.soon    { background:#fffbeb;color:#b45309; }
+.due-chip.normal  { background:var(--border-light);color:var(--text-muted); }
+.due-chip.overdue { background:#fff1f2;color:var(--prog); }
+.a-actions { display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s; }
+.a-item:hover .a-actions { opacity:1; }
+.sched-item { display:flex;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border-light); }
+.sched-item:last-child { border-bottom:none; }
+.sched-time  { font-size:11px;color:var(--text-muted);font-weight:600;min-width:50px;padding-top:1px; }
+.sched-bar   { width:3px;border-radius:99px;min-height:34px;flex-shrink:0; }
+.sched-name  { font-size:13px;font-weight:600; }
+.sched-sub   { font-size:12px;color:var(--text-muted);margin-top:2px; }
+/* quick-add modal */
+.qa-overlay {
+  position:fixed;inset:0;background:rgba(15,23,42,.45);
+  display:flex;align-items:flex-start;justify-content:flex-end;
+  padding:80px 36px 0;z-index:500;
+  opacity:0;pointer-events:none;transition:opacity .18s;
 }
-.stat-num  { font-size: 28px; font-weight: 700; line-height: 1; }
-.stat-lbl  { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
-.content-row {
-  display: grid; grid-template-columns: 1fr 320px; gap: 20px;
+.qa-overlay.open { opacity:1;pointer-events:all; }
+.qa-panel {
+  background:var(--card);border-radius:var(--radius-lg);
+  padding:24px;width:340px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(-10px) scale(.98);transition:transform .2s;
+  border:1px solid var(--border);
 }
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 22px 0;
+.qa-overlay.open .qa-panel { transform:translateY(0) scale(1); }
+.qa-title { font-size:15px;font-weight:800;margin-bottom:16px;letter-spacing:-.01em; }
+.qa-fields { display:flex;flex-direction:column;gap:13px;margin-bottom:16px; }
+.qa-actions { display:flex;gap:10px;align-items:center; }
+.qa-full-link { font-size:12.5px;color:var(--primary);font-weight:600;text-decoration:none;margin-left:auto; }
+.qa-full-link:hover { text-decoration:underline; }
+
+/* onboarding tip */
+.onboard-tip {
+  position:fixed; top:180px; left:268px;
+  background:#0f172a; color:#fff; padding:10px 14px;
+  border-radius:var(--radius-sm); font-size:13px; font-weight:500;
+  box-shadow:var(--shadow-md); z-index:200; max-width:200px;
+  display:none;
 }
-.section-title { font-size: 15px; font-weight: 700; }
-.assignment-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 22px; border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: background .12s;
-}
-.assignment-item:last-child { border-bottom: none; }
-.assignment-item:hover { background: var(--bg); }
-.check-circle {
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .15s;
-}
-.check-circle:hover { border-color: var(--primary); }
-.check-circle.done { background: var(--math); border-color: var(--math); }
-.check-circle.done::after { content:'✓'; color:#fff; font-size:11px; font-weight:700; }
-.a-title { font-size: 14px; font-weight: 600; }
-.a-title.done { text-decoration: line-through; color: var(--text-muted); }
-.a-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.due-soon { color: #ef4444 !important; font-weight: 600; }
-.sched-item {
-  display: flex; gap: 12px; align-items: flex-start;
-  padding: 12px 22px; border-bottom: 1px solid var(--border);
-}
-.sched-item:last-child { border-bottom: none; }
-.sched-time { font-size: 11px; color: var(--text-muted); font-weight: 600; min-width: 50px; padding-top: 2px; }
-.sched-bar  { width: 3px; border-radius: 99px; min-height: 36px; flex-shrink: 0; }
-.sched-title { font-size: 13px; font-weight: 600; }
-.sched-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.empty-state {
-  text-align: center; padding: 40px 20px;
-  color: var(--text-muted); font-size: 14px;
-}
-.empty-icon { font-size: 32px; margin-bottom: 8px; }
+.onboard-tip::before { content:''; position:absolute; left:-7px; top:50%; transform:translateY(-50%); border:7px solid transparent; border-right-color:#0f172a; border-left:none; }
+.onboard-close { cursor:pointer;float:right;margin-left:8px;opacity:.7; }
+.onboard-close:hover { opacity:1; }
 </style>
 </head>
-<body>
-<div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">📚</div>
-    <span>CampusPlanner</span>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Navigation</div>
-    <a class="nav-item active" href="./dashboard.html"><span class="ni">🏠</span> Dashboard</a>
-    <a class="nav-item" href="./calendar.html"><span class="ni">📅</span> Calendar</a>
-    <a class="nav-item" href="./addAssignment.html"><span class="ni">➕</span> Add Assignment</a>
-    <a class="nav-item" href="./notifications.html"><span class="ni">🔔</span> Notifications</a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Courses</div>
-    <a class="nav-item" href="./course.html?course=cs"><span class="course-dot" style="background:var(--cs)"></span> Computer Science</a>
-    <a class="nav-item" href="./course.html?course=prog"><span class="course-dot" style="background:var(--prog)"></span> Programming</a>
-    <a class="nav-item" href="./course.html?course=psych"><span class="course-dot" style="background:var(--psych)"></span> Psychology</a>
-    <a class="nav-item" href="./course.html?course=math"><span class="course-dot" style="background:var(--math)"></span> Discrete Math</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="profile-block">
-      <div class="avatar" id="avatarEl">JD</div>
-      <div>
-        <div class="profile-name" id="profileName">John Doe</div>
-        <div class="profile-sub">Junior • CS Major</div>
-      </div>
-    </div>
-  </div>
-</div>
+<body class="app-layout">
+<div id="sidebarMount"></div>
 
 <div class="main">
   <div class="page-header">
     <div>
-      <h1 class="page-title" id="greeting">Good morning, John 👋</h1>
-      <p class="page-sub" id="dateLabel"></p>
+      <h1 class="page-title" id="greeting"></h1>
+      <p class="page-sub" id="dateSub"></p>
     </div>
-    <a class="btn btn-primary" href="./addAssignment.html">+ Add Assignment</a>
+    <button class="btn btn-primary" onclick="openQA()">+ Add Assignment</button>
   </div>
 
-  <!-- Stats -->
   <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#eef2ff;">📝</div>
-      <div><div class="stat-num" id="statActive">0</div><div class="stat-lbl">Active Tasks</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fef3c7;">⏰</div>
-      <div><div class="stat-num" id="statWeek">0</div><div class="stat-lbl">Due This Week</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#ecfdf5;">✅</div>
-      <div><div class="stat-num" id="statDone">0</div><div class="stat-lbl">Completed</div></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#f0f9ff;">📖</div>
-      <div><div class="stat-num">4</div><div class="stat-lbl">Courses</div></div>
-    </div>
+    <div class="stat-card"><div class="stat-icon" style="background:#ede9fe;">📝</div><div><div class="stat-num" id="sActive">—</div><div class="stat-lbl">Active Tasks</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fffbeb;">⏰</div><div><div class="stat-num" id="sWeek">—</div><div class="stat-lbl">Due This Week</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;">✅</div><div><div class="stat-num" id="sDone">—</div><div class="stat-lbl">Completed</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fff1f2;">🚨</div><div><div class="stat-num" id="sOver" style="color:var(--prog)">—</div><div class="stat-lbl">Overdue</div></div></div>
   </div>
 
-  <!-- Content -->
-  <div class="content-row">
+  <div class="content-grid">
     <div class="card">
-      <div class="section-header">
+      <div class="section-hd">
         <span class="section-title">Upcoming Assignments</span>
         <a class="btn btn-outline btn-sm" href="./calendar.html">View Calendar</a>
       </div>
-      <div id="assignmentList" style="margin-top:8px;"></div>
+      <div id="aList"></div>
     </div>
-
     <div class="card">
-      <div class="section-header">
-        <span class="section-title">Today's Schedule</span>
-      </div>
-      <div id="scheduleList" style="margin-top:8px;"></div>
+      <div class="section-hd"><span class="section-title">Today's Schedule</span></div>
+      <div id="schedList"></div>
     </div>
   </div>
 </div>
 
-<script>
-const COURSES = {
-  cs:    { name:'Computer Science', color:'#6366f1', soft:'#eef2ff' },
-  prog:  { name:'Programming',      color:'#ef4444', soft:'#fef2f2' },
-  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb' },
-  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5' },
-};
+<!-- Onboarding tooltip (Thurston Violation 1-7) -->
+<div class="onboard-tip" id="onboardTip">
+  👈 Use this sidebar to navigate between pages and courses.
+  <span class="onboard-close" onclick="dismissTip()">✕</span>
+</div>
 
-function getAssignments() {
-  return JSON.parse(localStorage.getItem('cp_assignments') || '[]');
+<!-- Quick-Add Modal (Nelson Warning 2-7 — shortcuts for frequent users) -->
+<div class="qa-overlay" id="qaOverlay" onclick="closeQA(event)">
+  <div class="qa-panel">
+    <div class="qa-title">⚡ Quick Add Assignment</div>
+    <div class="qa-fields">
+
+      <div class="form-group">
+        <label class="form-label">Title <span class="req">*</span></label>
+        <input id="qaTitle" class="form-input" type="text"
+          placeholder="e.g. Research Paper"
+          maxlength="120"
+          oninput="document.getElementById('qaTitleErr').classList.remove('show');this.classList.remove('error')"
+          onkeydown="if(event.key==='Enter')saveQuick()">
+        <span class="form-error" id="qaTitleErr">Please enter a title.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Course <span class="req">*</span></label>
+        <select id="qaCourse" class="form-input"
+          onchange="document.getElementById('qaCourseErr').classList.remove('show');this.classList.remove('error')">
+          <option value="">Select a course…</option>
+          <option value="cs">📘 Computer Science</option>
+          <option value="prog">💻 Programming</option>
+          <option value="psych">🧠 Psychology</option>
+          <option value="math">📐 Discrete Math</option>
+        </select>
+        <span class="form-error" id="qaCourseErr">Please select a course.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Due Date <span class="req">*</span></label>
+        <input id="qaDate" class="form-input" type="date"
+          onchange="document.getElementById('qaDateErr').classList.remove('show');this.classList.remove('error')">
+        <span class="form-error" id="qaDateErr">Please select a due date.</span>
+        <span class="form-hint">Click to open date picker</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <div style="display:flex;gap:8px;">
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="qaPri" value="high" style="accent-color:var(--prog)"> 🔴 High
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="qaPri" value="medium" checked style="accent-color:var(--psych)"> 🟡 Medium
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
+            <input type="radio" name="qaPri" value="low" style="accent-color:var(--math)"> 🟢 Low
+          </label>
+        </div>
+      </div>
+
+    </div>
+    <div class="qa-actions">
+      <button class="btn btn-primary btn-sm" onclick="saveQuick()">💾 Save</button>
+      <button class="btn btn-outline btn-sm" onclick="closeQA()">Cancel</button>
+      <a class="qa-full-link" href="./addAssignment.html">Full form →</a>
+    </div>
+  </div>
+</div>
+
+<script src="./shared.js"></script>
+<script>
+document.getElementById('sidebarMount').innerHTML = buildSidebar('dashboard');
+seedIfEmpty();
+
+// Onboarding tip
+if (!localStorage.getItem('cp_tip_seen')) {
+  setTimeout(() => document.getElementById('onboardTip').style.display = 'block', 800);
 }
-function saveAssignments(arr) {
-  localStorage.setItem('cp_assignments', JSON.stringify(arr));
+function dismissTip() {
+  document.getElementById('onboardTip').style.display = 'none';
+  localStorage.setItem('cp_tip_seen', '1');
+}
+
+// Quick-add
+function openQA() {
+  document.getElementById('qaTitle').value  = '';
+  document.getElementById('qaCourse').value = '';
+  document.getElementById('qaDate').value   = '';
+  document.getElementById('qaDate').min     = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('[name="qaPri"]').forEach(r => r.checked = r.value === 'medium');
+  ['qaTitle','qaCourse','qaDate'].forEach(id => document.getElementById(id).classList.remove('error'));
+  ['qaTitleErr','qaCourseErr','qaDateErr'].forEach(id => document.getElementById(id).classList.remove('show'));
+  document.getElementById('qaOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('qaTitle').focus(), 180);
+}
+function closeQA(e) {
+  if (!e || e.target === document.getElementById('qaOverlay')) {
+    document.getElementById('qaOverlay').classList.remove('open');
+  }
+}
+function saveQuick() {
+  const title  = document.getElementById('qaTitle').value.trim();
+  const course = document.getElementById('qaCourse').value;
+  const date   = document.getElementById('qaDate').value;
+  const pri    = document.querySelector('[name="qaPri"]:checked')?.value || 'medium';
+  let ok = true;
+  if (!title)  { document.getElementById('qaTitle').classList.add('error');  document.getElementById('qaTitleErr').classList.add('show');  ok=false; }
+  if (!course) { document.getElementById('qaCourse').classList.add('error'); document.getElementById('qaCourseErr').classList.add('show'); ok=false; }
+  if (!date)   { document.getElementById('qaDate').classList.add('error');   document.getElementById('qaDateErr').classList.add('show');   ok=false; }
+  if (!ok) return;
+
+  const arr = getAssignments();
+  const id  = arr.length ? Math.max(...arr.map(a => a.id)) + 1 : 1;
+  arr.push({
+    id, title, course, dueDate: date, priority: pri,
+    reminder: '2', estHours: '', notes: '', completed: false,
+    createdAt: new Date().toISOString().split('T')[0]
+  });
+  saveAssignments(arr);
+  document.getElementById('qaOverlay').classList.remove('open');
+  showToast('✅ Assignment saved!');
+  init();
 }
 
 function init() {
-  // Greeting
+  const name = getUserName();
   const h = new Date().getHours();
-  const grt = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  const name = localStorage.getItem('cp_user_name') || 'John';
-  document.getElementById('greeting').textContent = `${grt}, ${name} 👋`;
+  const greet = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('greeting').textContent = `${greet}, ${name} 👋`;
 
-  // Date
-  const now = new Date();
-  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-  document.getElementById('dateLabel').textContent = now.toLocaleDateString('en-US', opts);
+  const now   = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate()+7);
+  document.getElementById('dateSub').textContent =
+    now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-  const all = getAssignments();
-  const today = new Date(); today.setHours(0,0,0,0);
-  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+  const all     = getAssignments();
+  const active  = all.filter(a=>!a.completed);
+  const doneArr = all.filter(a=>a.completed);
+  const dueWeek = active.filter(a=>{ const d=new Date(a.dueDate+'T00:00:00'); return d>=today&&d<=weekEnd; });
+  const overdue = active.filter(a=>new Date(a.dueDate+'T00:00:00')<today);
 
-  const active = all.filter(a => !a.completed);
-  const doneArr = all.filter(a => a.completed);
-  const dueWeek = active.filter(a => { const d = new Date(a.dueDate); return d >= today && d <= weekEnd; });
+  document.getElementById('sActive').textContent = active.length;
+  document.getElementById('sWeek').textContent   = dueWeek.length;
+  document.getElementById('sDone').textContent   = doneArr.length;
+  document.getElementById('sOver').textContent   = overdue.length;
 
-  document.getElementById('statActive').textContent = active.length;
-  document.getElementById('statWeek').textContent   = dueWeek.length;
-  document.getElementById('statDone').textContent   = doneArr.length;
-  document.getElementById('dateLabel').textContent += ` • You have ${dueWeek.length} assignment${dueWeek.length!==1?'s':''} due this week`;
-
-  // Upcoming list – sort by due date
-  const upcoming = [...active].sort((a,b) => new Date(a.dueDate)-new Date(b.dueDate)).slice(0,6);
-  const listEl = document.getElementById('assignmentList');
-  if (upcoming.length === 0) {
-    listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div>No upcoming assignments!</div>`;
+  const upcoming = [...active].sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,8);
+  const aList = document.getElementById('aList');
+  if (!upcoming.length) {
+    aList.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13.5px;"><div style="font-size:32px;margin-bottom:8px;">🎉</div>No upcoming assignments!</div>';
   } else {
-    listEl.innerHTML = upcoming.map(a => {
-      const c = COURSES[a.course] || {};
-      const due = new Date(a.dueDate);
-      const diff = Math.ceil((due - today) / 86400000);
-      const dueStr = diff === 0 ? 'Due today' : diff === 1 ? 'Due tomorrow' : diff < 0 ? 'Overdue' : `Due in ${diff} days`;
-      const dueCls = diff <= 2 ? 'due-soon' : '';
-      return `<div class="assignment-item">
-        <div class="check-circle${a.completed?' done':''}" onclick="toggleDone(${a.id}, this)"></div>
-        <div style="flex:1">
-          <div class="a-title${a.completed?' done':''}">${a.title}</div>
+    aList.innerHTML = upcoming.map(a => {
+      const c = COURSES[a.course]||{};
+      const diff = diffDays(a.dueDate);
+      let chipCls, chipTxt;
+      if(diff<0)       { chipCls='overdue'; chipTxt=`${Math.abs(diff)}d overdue`; }
+      else if(diff===0){ chipCls='urgent';  chipTxt='Due today'; }
+      else if(diff===1){ chipCls='urgent';  chipTxt='Due tomorrow'; }
+      else if(diff<=4) { chipCls='soon';    chipTxt=`Due in ${diff}d`; }
+      else             { chipCls='normal';  chipTxt=`Due ${fmtDate(a.dueDate)}`; }
+      return `<div class="a-item">
+        <div class="check-btn${a.completed?' done':''}" onclick="toggleComplete(${a.id},init)" title="Toggle complete"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="a-name${a.completed?' done':''}">${a.title}</div>
           <div class="a-meta">
-            <span class="badge badge-${a.course}" style="font-size:11px">${c.name||a.course}</span>
-            <span class="${dueCls}" style="margin-left:8px;font-size:12px;">${dueStr}</span>
+            <span class="badge badge-${a.course}">${c.name||a.course}</span>
+            <span class="due-chip ${chipCls}">${chipTxt}</span>
+            ${a.priority==='high'?'<span style="font-size:11px;color:var(--prog);font-weight:600;">● High</span>':''}
           </div>
         </div>
-      </div>`;
-    }).join('');
-  }
-
-  // Schedule – show due-today and due-soon items as schedule
-  const schedEl = document.getElementById('scheduleList');
-  const schedItems = [...active]
-    .filter(a => { const d = new Date(a.dueDate); const diff = Math.ceil((d-today)/86400000); return diff >= 0 && diff <= 3; })
-    .sort((a,b) => new Date(a.dueDate)-new Date(b.dueDate))
-    .slice(0,4);
-
-  if (schedItems.length === 0) {
-    schedEl.innerHTML = `<div class="empty-state"><div class="empty-icon">☀️</div>Nothing urgent today!</div>`;
-  } else {
-    schedEl.innerHTML = schedItems.map(a => {
-      const c = COURSES[a.course] || {};
-      const due = new Date(a.dueDate);
-      const diff = Math.ceil((due - today) / 86400000);
-      const label = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `In ${diff}d`;
-      return `<div class="sched-item">
-        <div class="sched-time">${label}</div>
-        <div class="sched-bar" style="background:${c.color||'#6366f1'}"></div>
-        <div>
-          <div class="sched-title">${a.title}</div>
-          <div class="sched-sub">${c.name||a.course}</div>
+        <div class="a-actions">
+          <a class="btn btn-ghost btn-sm" href="./addAssignment.html?edit=${a.id}" title="Edit">✏️</a>
+          <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${a.id},init)" title="Delete">🗑</button>
         </div>
       </div>`;
     }).join('');
   }
-}
 
-function toggleDone(id, el) {
-  const arr = getAssignments();
-  const a = arr.find(x => x.id === id);
-  if (!a) return;
-  a.completed = !a.completed;
-  saveAssignments(arr);
-  init();
+  const schedItems = [...active]
+    .filter(a=>{ const d=diffDays(a.dueDate); return d>=0&&d<=4; })
+    .sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,5);
+  const schedList = document.getElementById('schedList');
+  if(!schedItems.length){
+    schedList.innerHTML='<div style="text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;"><div style="font-size:28px;margin-bottom:8px;">☀️</div>Nothing urgent!</div>';
+  } else {
+    schedList.innerHTML = schedItems.map(a=>{
+      const c = COURSES[a.course]||{};
+      const diff = diffDays(a.dueDate);
+      const lbl  = diff===0?'Today':diff===1?'Tomorrow':`In ${diff}d`;
+      return `<div class="sched-item">
+        <div class="sched-time">${lbl}</div>
+        <div class="sched-bar" style="background:${c.color||'#6d57f8'}"></div>
+        <div>
+          <div class="sched-name">${a.title}</div>
+          <div class="sched-sub">${c.name||a.course}${a.estHours?` · ~${a.estHours}h`:''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 init();
