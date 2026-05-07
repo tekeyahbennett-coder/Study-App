@@ -3,314 +3,175 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CampusPlanner – Dashboard</title>
+<title>CampusPlanner – Sign In</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-.stat-card {
-  background:var(--card); border-radius:var(--radius); border:1px solid var(--border);
-  padding:20px 22px; display:flex; align-items:center; gap:16px;
-  box-shadow:var(--shadow-sm); transition:box-shadow .2s,transform .2s; cursor:default;
+.form-stack { display:flex; flex-direction:column; gap:18px; margin-bottom:24px; }
+.input-wrap { position:relative; }
+.input-wrap .form-input { padding-left:42px; }
+.input-icon {
+  position:absolute; left:13px; top:50%; transform:translateY(-50%);
+  font-size:15px; color:var(--text-muted); pointer-events:none;
 }
-.stat-card:hover { box-shadow:var(--shadow); transform:translateY(-1px); }
-.stat-icon { width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
-.stat-num  { font-size:28px;font-weight:800;line-height:1;letter-spacing:-.02em; }
-.stat-lbl  { font-size:12.5px;color:var(--text-muted);margin-top:3px;font-weight:500; }
-.content-grid { display:grid; grid-template-columns:1fr 300px; gap:18px; }
-.a-item { display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border-light);transition:background .12s; }
-.a-item:last-child { border-bottom:none; }
-.a-item:hover { background:#fafbff; }
-.check-btn { width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0; }
-.check-btn:hover  { border-color:var(--primary);background:var(--primary-soft); }
-.check-btn.done   { background:var(--math);border-color:var(--math); }
-.check-btn.done::after { content:'✓';color:#fff;font-size:11px;font-weight:700; }
-.a-name { font-size:13.5px;font-weight:600; }
-.a-name.done { text-decoration:line-through;color:var(--text-muted); }
-.a-meta { display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap; }
-.due-chip { font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px; }
-.due-chip.urgent  { background:#fff1f2;color:var(--prog); }
-.due-chip.soon    { background:#fffbeb;color:#b45309; }
-.due-chip.normal  { background:var(--border-light);color:var(--text-muted); }
-.due-chip.overdue { background:#fff1f2;color:var(--prog); }
-.a-actions { display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s; }
-.a-item:hover .a-actions { opacity:1; }
-.sched-item { display:flex;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border-light); }
-.sched-item:last-child { border-bottom:none; }
-.sched-time  { font-size:11px;color:var(--text-muted);font-weight:600;min-width:50px;padding-top:1px; }
-.sched-bar   { width:3px;border-radius:99px;min-height:34px;flex-shrink:0; }
-.sched-name  { font-size:13px;font-weight:600; }
-.sched-sub   { font-size:12px;color:var(--text-muted);margin-top:2px; }
-/* quick-add modal */
-.qa-overlay {
-  position:fixed;inset:0;background:rgba(15,23,42,.45);
-  display:flex;align-items:flex-start;justify-content:flex-end;
-  padding:80px 36px 0;z-index:500;
-  opacity:0;pointer-events:none;transition:opacity .18s;
+.forgot-row { display:flex; justify-content:flex-end; margin-top:-6px; }
+.forgot-link { font-size:13px; color:var(--primary); font-weight:600; text-decoration:none; }
+.forgot-link:hover { text-decoration:underline; }
+.alert-box {
+  background:#fff1f2; border:1px solid #fecdd3; border-radius:var(--radius-sm);
+  padding:10px 14px; font-size:13px; color:#be123c; margin-bottom:16px; display:none;
 }
-.qa-overlay.open { opacity:1;pointer-events:all; }
-.qa-panel {
-  background:var(--card);border-radius:var(--radius-lg);
-  padding:24px;width:340px;
-  box-shadow:var(--shadow-lg);
-  transform:translateY(-10px) scale(.98);transition:transform .2s;
-  border:1px solid var(--border);
-}
-.qa-overlay.open .qa-panel { transform:translateY(0) scale(1); }
-.qa-title { font-size:15px;font-weight:800;margin-bottom:16px;letter-spacing:-.01em; }
-.qa-fields { display:flex;flex-direction:column;gap:13px;margin-bottom:16px; }
-.qa-actions { display:flex;gap:10px;align-items:center; }
-.qa-full-link { font-size:12.5px;color:var(--primary);font-weight:600;text-decoration:none;margin-left:auto; }
-.qa-full-link:hover { text-decoration:underline; }
-
-/* onboarding tip */
-.onboard-tip {
-  position:fixed; top:180px; left:268px;
-  background:#0f172a; color:#fff; padding:10px 14px;
-  border-radius:var(--radius-sm); font-size:13px; font-weight:500;
-  box-shadow:var(--shadow-md); z-index:200; max-width:200px;
-  display:none;
-}
-.onboard-tip::before { content:''; position:absolute; left:-7px; top:50%; transform:translateY(-50%); border:7px solid transparent; border-right-color:#0f172a; border-left:none; }
-.onboard-close { cursor:pointer;float:right;margin-left:8px;opacity:.7; }
-.onboard-close:hover { opacity:1; }
+.alert-box.show { display:block; }
 </style>
 </head>
-<body class="app-layout">
-<div id="sidebarMount"></div>
+<body class="auth-body">
 
-<div class="main">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title" id="greeting"></h1>
-      <p class="page-sub" id="dateSub"></p>
-    </div>
-    <button class="btn btn-primary" onclick="openQA()">+ Add Assignment</button>
+<!-- LEFT PANEL -->
+<div class="auth-left">
+  <div class="auth-brand">
+    <div class="logo-mark">📚</div>
+    <span class="auth-brand-name">CampusPlanner</span>
   </div>
-
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-icon" style="background:#ede9fe;">📝</div><div><div class="stat-num" id="sActive">—</div><div class="stat-lbl">Active Tasks</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#fffbeb;">⏰</div><div><div class="stat-num" id="sWeek">—</div><div class="stat-lbl">Due This Week</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#ecfdf5;">✅</div><div><div class="stat-num" id="sDone">—</div><div class="stat-lbl">Completed</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#fff1f2;">🚨</div><div><div class="stat-num" id="sOver" style="color:var(--prog)">—</div><div class="stat-lbl">Overdue</div></div></div>
-  </div>
-
-  <div class="content-grid">
-    <div class="card">
-      <div class="section-hd">
-        <span class="section-title">Upcoming Assignments</span>
-        <a class="btn btn-outline btn-sm" href="./calendar.html">View Calendar</a>
+  <div class="auth-hero">
+    <h1 class="auth-hero-title">Stay on top of<br><span>every deadline.</span></h1>
+    <p class="auth-hero-sub">Track assignments, manage your schedule, and never miss a due date again.</p>
+    <div class="auth-features">
+      <div class="auth-feature">
+        <div class="auth-feature-icon">📅</div>
+        <span class="auth-feature-text">Color-coded calendar with all your courses</span>
       </div>
-      <div id="aList"></div>
-    </div>
-    <div class="card">
-      <div class="section-hd"><span class="section-title">Today's Schedule</span></div>
-      <div id="schedList"></div>
+      <div class="auth-feature">
+        <div class="auth-feature-icon">🔔</div>
+        <span class="auth-feature-text">Smart deadline reminders before due dates</span>
+      </div>
+      <div class="auth-feature">
+        <div class="auth-feature-icon">📊</div>
+        <span class="auth-feature-text">Dashboard overview of upcoming tasks</span>
+      </div>
     </div>
   </div>
+  <p class="auth-tagline">© 2026 CampusPlanner · Built for students</p>
 </div>
 
-<!-- Onboarding tooltip (Thurston Violation 1-7) -->
-<div class="onboard-tip" id="onboardTip">
-  👈 Use this sidebar to navigate between pages and courses.
-  <span class="onboard-close" onclick="dismissTip()">✕</span>
-</div>
+<!-- RIGHT PANEL (form) -->
+<div class="auth-right">
+  <div class="auth-form-wrap">
+    <h1 class="auth-form-title">Welcome back</h1>
+    <p class="auth-form-sub">Sign in to access your study planner</p>
 
-<!-- Quick-Add Modal (Nelson Warning 2-7 — shortcuts for frequent users) -->
-<div class="qa-overlay" id="qaOverlay" onclick="closeQA(event)">
-  <div class="qa-panel">
-    <div class="qa-title">⚡ Quick Add Assignment</div>
-    <div class="qa-fields">
+    <!-- Error alert (wrong credentials feedback — addresses Elliott Violation 1-9) -->
+    <div class="alert-box" id="alertBox">
+      ⚠ Incorrect email or password. Please check your details or
+      <a href="./password.html" style="color:inherit;font-weight:700;">reset your password</a>.
+    </div>
 
+    <div class="form-stack">
       <div class="form-group">
-        <label class="form-label">Title <span class="req">*</span></label>
-        <input id="qaTitle" class="form-input" type="text"
-          placeholder="e.g. Research Paper"
-          maxlength="120"
-          oninput="document.getElementById('qaTitleErr').classList.remove('show');this.classList.remove('error')"
-          onkeydown="if(event.key==='Enter')saveQuick()">
-        <span class="form-error" id="qaTitleErr">Please enter a title.</span>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Course <span class="req">*</span></label>
-        <select id="qaCourse" class="form-input"
-          onchange="document.getElementById('qaCourseErr').classList.remove('show');this.classList.remove('error')">
-          <option value="">Select a course…</option>
-          <option value="cs">📘 Computer Science</option>
-          <option value="prog">💻 Programming</option>
-          <option value="psych">🧠 Psychology</option>
-          <option value="math">📐 Discrete Math</option>
-        </select>
-        <span class="form-error" id="qaCourseErr">Please select a course.</span>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Due Date <span class="req">*</span></label>
-        <input id="qaDate" class="form-input" type="date"
-          onchange="document.getElementById('qaDateErr').classList.remove('show');this.classList.remove('error')">
-        <span class="form-error" id="qaDateErr">Please select a due date.</span>
-        <span class="form-hint">Click to open date picker</span>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Priority</label>
-        <div style="display:flex;gap:8px;">
-          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
-            <input type="radio" name="qaPri" value="high" style="accent-color:var(--prog)"> 🔴 High
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
-            <input type="radio" name="qaPri" value="medium" checked style="accent-color:var(--psych)"> 🟡 Medium
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;">
-            <input type="radio" name="qaPri" value="low" style="accent-color:var(--math)"> 🟢 Low
-          </label>
+        <label class="form-label">Email address</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input id="email" class="form-input" type="email"
+            placeholder="you@university.edu" autocomplete="email"
+            oninput="clearFieldErr('email','emailErr')">
         </div>
+        <span class="form-error" id="emailErr">Please enter your email address.</span>
       </div>
 
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input id="password" class="form-input" type="password"
+            placeholder="Enter your password" autocomplete="current-password"
+            oninput="clearFieldErr('password','passErr')">
+        </div>
+        <span class="form-error" id="passErr">Please enter your password.</span>
+      </div>
+
+      <div class="forgot-row">
+        <a class="forgot-link" href="./password.html">Forgot password?</a>
+      </div>
     </div>
-    <div class="qa-actions">
-      <button class="btn btn-primary btn-sm" onclick="saveQuick()">💾 Save</button>
-      <button class="btn btn-outline btn-sm" onclick="closeQA()">Cancel</button>
-      <a class="qa-full-link" href="./addAssignment.html">Full form →</a>
-    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" onclick="signIn()">Sign in →</button>
+
+    <div class="auth-divider">or</div>
+
+    <p class="auth-footer-link">
+      Don't have an account? <a href="./signup.html">Create one free.</a>
+    </p>
   </div>
 </div>
 
-<script src="./shared.js"></script>
+<div class="toast success" id="toast">✅ Signing you in…</div>
+
 <script>
-document.getElementById('sidebarMount').innerHTML = buildSidebar('dashboard');
-requireLogin();
-seedIfEmpty();
+// Seed data on first ever visit so the app has content
+(function seedData() {
+  if (JSON.parse(localStorage.getItem('cp_assignments') || '[]').length > 0) return;
+  const today = new Date();
+  const d = o => { const x=new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  localStorage.setItem('cp_assignments', JSON.stringify([
+    {id:1,title:'Research Paper',      course:'psych',dueDate:d(6), reminder:'2',priority:'high',  estHours:'4',notes:'Manifest Destiny essay – 8 pages',completed:false,createdAt:d(-5)},
+    {id:2,title:'Group Project',       course:'cs',   dueDate:d(4), reminder:'2',priority:'high',  estHours:'6',notes:'HCI prototype demo',              completed:false,createdAt:d(-5)},
+    {id:3,title:'Lab Report',          course:'cs',   dueDate:d(-3),reminder:'2',priority:'medium',estHours:'2',notes:'',                                completed:true, createdAt:d(-8)},
+    {id:4,title:'Coding Project',      course:'prog', dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'Nested loops chapter',             completed:false,createdAt:d(-2)},
+    {id:5,title:'CS Midterm',          course:'cs',   dueDate:d(18),reminder:'7',priority:'high',  estHours:'8',notes:'Study chapters 1–6',               completed:false,createdAt:d(-2)},
+    {id:6,title:'Discrete HW',         course:'math', dueDate:d(20),reminder:'2',priority:'low',   estHours:'2',notes:'Problem set 4',                    completed:false,createdAt:d(-1)},
+    {id:7,title:'Psychology Quiz',     course:'psych',dueDate:d(13),reminder:'1',priority:'medium',estHours:'1',notes:'',                                 completed:false,createdAt:d(-1)},
+    {id:8,title:'Prog. Assignment 3',  course:'prog', dueDate:d(22),reminder:'2',priority:'medium',estHours:'3',notes:'Recursion exercises',               completed:false,createdAt:d(0)},
+  ]));
+})();
 
-// Onboarding tip
-if (!localStorage.getItem('cp_tip_seen')) {
-  setTimeout(() => document.getElementById('onboardTip').style.display = 'block', 800);
-}
-function dismissTip() {
-  document.getElementById('onboardTip').style.display = 'none';
-  localStorage.setItem('cp_tip_seen', '1');
+function clearFieldErr(inputId, errId) {
+  document.getElementById(inputId).classList.remove('error');
+  document.getElementById(errId).classList.remove('show');
+  document.getElementById('alertBox').classList.remove('show');
 }
 
-// Quick-add
-function openQA() {
-  document.getElementById('qaTitle').value  = '';
-  document.getElementById('qaCourse').value = '';
-  document.getElementById('qaDate').value   = '';
-  document.getElementById('qaDate').min     = new Date().toISOString().split('T')[0];
-  document.querySelectorAll('[name="qaPri"]').forEach(r => r.checked = r.value === 'medium');
-  ['qaTitle','qaCourse','qaDate'].forEach(id => document.getElementById(id).classList.remove('error'));
-  ['qaTitleErr','qaCourseErr','qaDateErr'].forEach(id => document.getElementById(id).classList.remove('show'));
-  document.getElementById('qaOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('qaTitle').focus(), 180);
-}
-function closeQA(e) {
-  if (!e || e.target === document.getElementById('qaOverlay')) {
-    document.getElementById('qaOverlay').classList.remove('open');
-  }
-}
-function saveQuick() {
-  const title  = document.getElementById('qaTitle').value.trim();
-  const course = document.getElementById('qaCourse').value;
-  const date   = document.getElementById('qaDate').value;
-  const pri    = document.querySelector('[name="qaPri"]:checked')?.value || 'medium';
+function signIn() {
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('password').value;
   let ok = true;
-  if (!title)  { document.getElementById('qaTitle').classList.add('error');  document.getElementById('qaTitleErr').classList.add('show');  ok=false; }
-  if (!course) { document.getElementById('qaCourse').classList.add('error'); document.getElementById('qaCourseErr').classList.add('show'); ok=false; }
-  if (!date)   { document.getElementById('qaDate').classList.add('error');   document.getElementById('qaDateErr').classList.add('show');   ok=false; }
+
+  // Clear previous errors
+  ['email','password'].forEach(id => document.getElementById(id).classList.remove('error'));
+  ['emailErr','passErr'].forEach(id => document.getElementById(id).classList.remove('show'));
+  document.getElementById('alertBox').classList.remove('show');
+
+  // Validate — addresses Elliott Violation 1-5
+  if (!email || !email.includes('@')) {
+    document.getElementById('email').classList.add('error');
+    document.getElementById('emailErr').classList.add('show');
+    ok = false;
+  }
+  if (!pass) {
+    document.getElementById('password').classList.add('error');
+    document.getElementById('passErr').classList.add('show');
+    ok = false;
+  }
   if (!ok) return;
 
-  const arr = getAssignments();
-  const id  = arr.length ? Math.max(...arr.map(a => a.id)) + 1 : 1;
-  arr.push({
-    id, title, course, dueDate: date, priority: pri,
-    reminder: '2', estHours: '', notes: '', completed: false,
-    createdAt: new Date().toISOString().split('T')[0]
-  });
-  saveAssignments(arr);
-  document.getElementById('qaOverlay').classList.remove('open');
-  showToast('✅ Assignment saved!');
-  init();
-}
-
-function init() {
-  const name = getUserName();
-  const h = new Date().getHours();
-  const greet = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('greeting').textContent = `${greet}, ${name} 👋`;
-
-  const now   = new Date();
-  const today = new Date(now); today.setHours(0,0,0,0);
-  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate()+7);
-  document.getElementById('dateSub').textContent =
-    now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-  const all     = getAssignments();
-  const active  = all.filter(a=>!a.completed);
-  const doneArr = all.filter(a=>a.completed);
-  const dueWeek = active.filter(a=>{ const d=new Date(a.dueDate+'T00:00:00'); return d>=today&&d<=weekEnd; });
-  const overdue = active.filter(a=>new Date(a.dueDate+'T00:00:00')<today);
-
-  document.getElementById('sActive').textContent = active.length;
-  document.getElementById('sWeek').textContent   = dueWeek.length;
-  document.getElementById('sDone').textContent   = doneArr.length;
-  document.getElementById('sOver').textContent   = overdue.length;
-
-  const upcoming = [...active].sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,8);
-  const aList = document.getElementById('aList');
-  if (!upcoming.length) {
-    aList.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13.5px;"><div style="font-size:32px;margin-bottom:8px;">🎉</div>No upcoming assignments!</div>';
-  } else {
-    aList.innerHTML = upcoming.map(a => {
-      const c = COURSES[a.course]||{};
-      const diff = diffDays(a.dueDate);
-      let chipCls, chipTxt;
-      if(diff<0)       { chipCls='overdue'; chipTxt=`${Math.abs(diff)}d overdue`; }
-      else if(diff===0){ chipCls='urgent';  chipTxt='Due today'; }
-      else if(diff===1){ chipCls='urgent';  chipTxt='Due tomorrow'; }
-      else if(diff<=4) { chipCls='soon';    chipTxt=`Due in ${diff}d`; }
-      else             { chipCls='normal';  chipTxt=`Due ${fmtDate(a.dueDate)}`; }
-      return `<div class="a-item">
-        <div class="check-btn${a.completed?' done':''}" onclick="toggleComplete(${a.id},init)" title="Toggle complete"></div>
-        <div style="flex:1;min-width:0;">
-          <div class="a-name${a.completed?' done':''}">${a.title}</div>
-          <div class="a-meta">
-            <span class="badge badge-${a.course}">${c.name||a.course}</span>
-            <span class="due-chip ${chipCls}">${chipTxt}</span>
-            ${a.priority==='high'?'<span style="font-size:11px;color:var(--prog);font-weight:600;">● High</span>':''}
-          </div>
-        </div>
-        <div class="a-actions">
-          <a class="btn btn-ghost btn-sm" href="./addAssignment.html?edit=${a.id}" title="Edit">✏️</a>
-          <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${a.id},init)" title="Delete">🗑</button>
-        </div>
-      </div>`;
-    }).join('');
+  // Simulate credential check — wrong password shows helpful error (Elliott Violation 1-9)
+  const savedPass = localStorage.getItem('cp_password');
+  if (savedPass && pass !== savedPass) {
+    document.getElementById('password').classList.add('error');
+    document.getElementById('alertBox').classList.add('show');
+    return;
   }
 
-  const schedItems = [...active]
-    .filter(a=>{ const d=diffDays(a.dueDate); return d>=0&&d<=4; })
-    .sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,5);
-  const schedList = document.getElementById('schedList');
-  if(!schedItems.length){
-    schedList.innerHTML='<div style="text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;"><div style="font-size:28px;margin-bottom:8px;">☀️</div>Nothing urgent!</div>';
-  } else {
-    schedList.innerHTML = schedItems.map(a=>{
-      const c = COURSES[a.course]||{};
-      const diff = diffDays(a.dueDate);
-      const lbl  = diff===0?'Today':diff===1?'Tomorrow':`In ${diff}d`;
-      return `<div class="sched-item">
-        <div class="sched-time">${lbl}</div>
-        <div class="sched-bar" style="background:${c.color||'#6d57f8'}"></div>
-        <div>
-          <div class="sched-name">${a.title}</div>
-          <div class="sched-sub">${c.name||a.course}${a.estHours?` · ~${a.estHours}h`:''}</div>
-        </div>
-      </div>`;
-    }).join('');
+  // Save user name hint from email
+  if (!localStorage.getItem('cp_user_name')) {
+    const namePart = email.split('@')[0].split('.')[0];
+    localStorage.setItem('cp_user_name', namePart.charAt(0).toUpperCase() + namePart.slice(1));
   }
+
+  localStorage.setItem('cp_logged_in', '1');
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => window.location.href = './dashboard.html', 900);
 }
 
-init();
+document.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
 </script>
 </body>
 </html>
