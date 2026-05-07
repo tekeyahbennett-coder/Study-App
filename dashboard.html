@@ -95,6 +95,7 @@
 <script src="./shared.js"></script>
 <script>
 document.getElementById('sidebarMount').innerHTML = buildSidebar('calendar');
+requireLogin();
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 let yr = new Date().getFullYear();

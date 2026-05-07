@@ -151,6 +151,7 @@ function rowHtml(a,type){
   </div>`;
 }
 
+requireLogin();
 render();
 </script>
 </body>

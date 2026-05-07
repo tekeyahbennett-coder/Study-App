@@ -8,7 +8,13 @@ const COURSES = {
   math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
 };
 
-// ── Data layer ────────────────────────────────────────────────
+// ── Auth guard — call at top of every app page ───────────────
+function requireLogin() {
+  if (!sessionStorage.getItem('cp_logged_in')) {
+    window.location.replace('./index.html');
+  }
+}
+
 function getAssignments()     { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
 function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
 function getUserName()        { return localStorage.getItem('cp_user_name') || 'John'; }
