@@ -49,7 +49,161 @@
   <div style="text-align:center;padding:60px;color:var(--text-muted);">Loading…</div>
 </div>
 
-<script src="./shared.js"></script>
+<script>
+// shared.js — sidebar builder, data layer, utilities
+// Used by all app pages (dashboard, calendar, addAssignment, notifications, course)
+
+const COURSES = {
+  cs:    { name:'Computer Science', color:'#6d57f8', soft:'#ede9fe', icon:'📘', grad:'linear-gradient(135deg,#6d57f8,#8b78ff)' },
+  prog:  { name:'Programming',      color:'#f43f5e', soft:'#fff1f2', icon:'💻', grad:'linear-gradient(135deg,#f43f5e,#fb7185)' },
+  psych: { name:'Psychology',       color:'#f59e0b', soft:'#fffbeb', icon:'🧠', grad:'linear-gradient(135deg,#f59e0b,#fbbf24)' },
+  math:  { name:'Discrete Math',    color:'#10b981', soft:'#ecfdf5', icon:'📐', grad:'linear-gradient(135deg,#10b981,#34d399)' },
+};
+
+// ── Sign out ─────────────────────────────────────────────────
+function signOut() {
+  localStorage.removeItem('cp_logged_in');
+  window.location.replace('./index.html');
+}
+
+// ── Auth guard — call at top of every app page ───────────────
+function requireLogin() {
+  if (!localStorage.getItem('cp_logged_in')) {
+    window.location.replace('./index.html');
+  }
+}
+
+function getAssignments()     { return JSON.parse(localStorage.getItem('cp_assignments') || '[]'); }
+function saveAssignments(arr) { localStorage.setItem('cp_assignments', JSON.stringify(arr)); }
+function getUserName()        { return localStorage.getItem('cp_user_name') || 'John'; }
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── Seed data (runs if localStorage is empty) ────────────────
+function seedIfEmpty() {
+  if (getAssignments().length > 0) return;
+  const today = new Date();
+  const d = o => { const x = new Date(today); x.setDate(x.getDate()+o); return x.toISOString().split('T')[0]; };
+  saveAssignments([
+    {id:1,title:'Research Paper',        course:'psych',dueDate:d(6), reminder:'2',priority:'high',  estHours:'4',notes:'Manifest Destiny essay – 8 pages',  completed:false,createdAt:d(-5)},
+    {id:2,title:'Group Project',         course:'cs',   dueDate:d(4), reminder:'2',priority:'high',  estHours:'6',notes:'HCI prototype demo',                 completed:false,createdAt:d(-5)},
+    {id:3,title:'Lab Report',            course:'cs',   dueDate:d(-3),reminder:'2',priority:'medium',estHours:'2',notes:'Already submitted',                  completed:true, createdAt:d(-8)},
+    {id:4,title:'Coding Project',        course:'prog', dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'Nested loops chapter',               completed:false,createdAt:d(-2)},
+    {id:5,title:'CS Midterm',            course:'cs',   dueDate:d(18),reminder:'7',priority:'high',  estHours:'8',notes:'Study chapters 1–6',                 completed:false,createdAt:d(-2)},
+    {id:6,title:'Discrete HW',           course:'math', dueDate:d(20),reminder:'2',priority:'low',   estHours:'2',notes:'Problem set 4',                      completed:false,createdAt:d(-1)},
+    {id:7,title:'Psychology Quiz',       course:'psych',dueDate:d(13),reminder:'1',priority:'medium',estHours:'1',notes:'',                                   completed:false,createdAt:d(-1)},
+    {id:8,title:'Prog. Assignment 3',    course:'prog', dueDate:d(22),reminder:'2',priority:'medium',estHours:'3',notes:'Recursion exercises',                 completed:false,createdAt:d(0)},
+  ]);
+}
+
+// ── Delete assignment ────────────────────────────────────────
+function deleteAssignment(id, callback) {
+  if (!confirm('Delete this assignment? This cannot be undone.')) return;
+  const arr = getAssignments().filter(a => a.id !== id);
+  saveAssignments(arr);
+  showToast('🗑 Assignment deleted');
+  if (callback) callback();
+}
+
+// ── Toggle complete ──────────────────────────────────────────
+function toggleComplete(id, callback) {
+  const arr = getAssignments();
+  const a = arr.find(x => x.id === id);
+  if (!a) return;
+  a.completed = !a.completed;
+  saveAssignments(arr);
+  showToast(a.completed ? '✅ Marked complete!' : '↩ Marked incomplete');
+  if (callback) callback();
+}
+
+// ── Format date ──────────────────────────────────────────────
+function fmtDate(str) {
+  return new Date(str + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function diffDays(str) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.ceil((new Date(str + 'T00:00:00') - t) / 86400000);
+}
+
+// ── Sidebar builder ──────────────────────────────────────────
+function buildSidebar(activePage) {
+  const name     = getUserName();
+  const initials = name.substring(0, 2).toUpperCase();
+
+  const courseLinks = Object.entries(COURSES).map(([key, c]) =>
+    `<a class="nav-link${activePage === 'course-' + key ? ' active' : ''}"
+        href="./course.html?course=${key}">
+       <span class="course-pip" style="background:${c.color}"></span>
+       <span>${c.name}</span>
+     </a>`
+  ).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">📚</div>
+      <span class="logo-name">CampusPlanner</span>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Menu</div>
+      <a class="nav-link${activePage==='dashboard'      ?' active':''}" href="./dashboard.html">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a class="nav-link${activePage==='calendar'       ?' active':''}" href="./calendar.html">
+        <span class="icon">📅</span><span>Calendar</span>
+      </a>
+      <a class="nav-link${activePage==='add'            ?' active':''}" href="./addAssignment.html">
+        <span class="icon">➕</span><span>Add Assignment</span>
+      </a>
+      <a class="nav-link${activePage==='notifications'  ?' active':''}" href="./notifications.html">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Courses</div>
+      ${courseLinks}
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="profile-row">
+        <div class="avatar-circle">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="profile-name">${name} Doe</div>
+          <div class="profile-sub">Junior · CS Major</div>
+        </div>
+      </div>
+      <button onclick="signOut()" style="
+        width:100%; margin-top:8px; padding:8px 12px;
+        background:rgba(244,63,94,.12); color:#f87171;
+        border:1px solid rgba(244,63,94,.2); border-radius:8px;
+        font-size:13px; font-weight:600; cursor:pointer;
+        font-family:inherit; transition:background .15s;
+        display:flex; align-items:center; justify-content:center; gap:6px;
+      " onmouseover="this.style.background='rgba(244,63,94,.2)'"
+         onmouseout="this.style.background='rgba(244,63,94,.12)'">
+        🚪 Sign Out
+      </button>
+    </div>
+  </div>`;
+}
+
+</script>
 <script>
 function getParam(k){ return new URLSearchParams(window.location.search).get(k); }
 
