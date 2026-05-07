@@ -3,142 +3,118 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CampusPlanner – Notifications</title>
+<title>CampusPlanner – Create Account</title>
 <link rel="stylesheet" href="./main.css">
 <style>
-.tab-bar { display:flex;gap:3px;background:var(--bg);border-radius:var(--radius-sm);padding:3px;border:1.5px solid var(--border); }
-.tab { padding:6px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text-muted);transition:all .12s;font-family:inherit;white-space:nowrap; }
-.tab.active { background:var(--card);color:var(--text);box-shadow:var(--shadow-sm); }
-.tab .cnt { display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:99px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;margin-left:5px;vertical-align:middle; }
-.n-item { display:flex;align-items:flex-start;gap:14px;padding:16px 22px;border-bottom:1px solid var(--border-light);transition:background .12s; }
-.n-item:last-child { border-bottom:none; }
-.n-item.unread { background:#fdfcff; }
-.n-item:hover { background:#fafbff; }
-.n-icon { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
-.n-body { flex:1;min-width:0; }
-.n-title { font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px; }
-.n-sub   { font-size:13px;color:var(--text-muted);line-height:1.5; }
-.n-actions { display:flex;gap:8px;margin-top:9px; }
-.n-right { display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0; }
-.n-time  { font-size:12px;color:var(--text-muted);white-space:nowrap; }
-.n-dot   { width:8px;height:8px;border-radius:50%;background:var(--primary); }
+.form-stack  { display:flex; flex-direction:column; gap:16px; margin-bottom:24px; }
+.form-row-2  { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.input-wrap  { position:relative; }
+.input-wrap .form-input { padding-left:42px; }
+.input-icon  { position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text-muted);pointer-events:none; }
+.terms { font-size:12px;color:var(--text-muted);text-align:center;margin-top:14px;line-height:1.6; }
+.terms a { color:var(--primary);text-decoration:none; }
 </style>
 </head>
-<body class="app-layout">
-<div id="sidebarMount"></div>
-
-<div class="main">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Notifications 🔔</h1>
-      <p class="page-sub" id="unreadSub"></p>
-    </div>
-    <button class="btn btn-outline" onclick="markAllRead()">Mark all as read</button>
+<body class="auth-body">
+<div class="auth-left">
+  <div class="auth-brand">
+    <div class="logo-mark">📚</div>
+    <span class="auth-brand-name">CampusPlanner</span>
   </div>
-
-  <div class="card">
-    <div style="padding:16px 22px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-      <div class="tab-bar">
-        <button class="tab active" onclick="setTab('all',this)">All</button>
-        <button class="tab" id="tabUnread" onclick="setTab('unread',this)">Unread</button>
-        <button class="tab" onclick="setTab('soon',this)">Due Soon</button>
-        <button class="tab" onclick="setTab('done',this)">Completed</button>
-      </div>
+  <div class="auth-hero">
+    <h1 class="auth-hero-title">Your academic<br><span>command center.</span></h1>
+    <p class="auth-hero-sub">Join students who use CampusPlanner to stay organised and stress-free all semester.</p>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="auth-feature-icon">✅</div><span class="auth-feature-text">Free forever — no credit card needed</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">⚡</div><span class="auth-feature-text">Set up in under 2 minutes</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">🔐</div><span class="auth-feature-text">Your data stays private in your browser</span></div>
     </div>
-    <div id="nList" style="margin-top:8px;"></div>
   </div>
+  <p class="auth-tagline">© 2026 CampusPlanner · Built for students</p>
 </div>
 
-<script src="./shared.js"></script>
-<script>
-document.getElementById('sidebarMount').innerHTML = buildSidebar('notifications');
-requireLogin();
+<div class="auth-right">
+  <div class="auth-form-wrap">
+    <a class="auth-back" href="./index.html">← Back to sign in</a>
+    <h1 class="auth-form-title">Create your account</h1>
+    <p class="auth-form-sub">Start organising your academic life — it's free.</p>
 
-let currentTab = 'all';
-function getRead()  { return JSON.parse(localStorage.getItem('cp_read')||'[]'); }
-function setRead(a) { localStorage.setItem('cp_read',JSON.stringify(a)); }
-
-function buildNotifs(){
-  const today=new Date(); today.setHours(0,0,0,0);
-  const read=getRead();
-  const notifs=[];
-  getAssignments().forEach(a=>{
-    const d=diffDays(a.dueDate);
-    const c=COURSES[a.course]||{};
-    const rk=a.completed?`done-${a.id}`:`soon-${a.id}`;
-    const isRead=read.includes(rk);
-    if(a.completed){
-      notifs.push({id:a.id,type:'done',rk,title:'Assignment completed',
-        sub:`${a.title} – ${c.name||a.course} was marked complete. Great work!`,
-        icon:'✅',soft:'#ecfdf5',diff:9999,read:isRead});
-    } else if(d<0){
-      notifs.push({id:a.id,type:'soon',rk,title:'Assignment overdue!',
-        sub:`${a.title} – ${c.name||a.course} was due ${Math.abs(d)} day${Math.abs(d)!==1?'s':''} ago.`,
-        icon:'🚨',soft:'#fff1f2',diff:d,read:isRead});
-    } else if(d<=7){
-      const when=d===0?'today':d===1?'tomorrow':`in ${d} days`;
-      notifs.push({id:a.id,type:'soon',rk,
-        title:d===0?'Due today!':d<=2?`Due ${when}`:`Upcoming: ${a.title}`,
-        sub:`${a.title} – ${c.name||a.course} is due ${when}.`,
-        icon:c.icon||'📋',soft:c.soft||'#ede9fe',diff:d,read:isRead});
-    }
-  });
-  return notifs.sort((a,b)=>(a.read-b.read)||(a.diff-b.diff));
-}
-
-function timeLabel(d){
-  if(d<0) return `${Math.abs(d)}d ago`;
-  if(d===0) return 'Today';
-  if(d===1) return 'Tomorrow';
-  return `In ${d}d`;
-}
-
-function setTab(t,el){
-  currentTab=t;
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
-function render(){
-  const all=buildNotifs();
-  const unread=all.filter(n=>!n.read);
-  document.getElementById('unreadSub').textContent=`${unread.length} unread reminder${unread.length!==1?'s':''}`;
-  const tu=document.getElementById('tabUnread');
-  tu.innerHTML=`Unread${unread.length?`<span class="cnt">${unread.length}</span>`:''}`;
-
-  let list=all;
-  if(currentTab==='unread') list=all.filter(n=>!n.read);
-  if(currentTab==='soon')   list=all.filter(n=>n.type==='soon');
-  if(currentTab==='done')   list=all.filter(n=>n.type==='done');
-
-  const el=document.getElementById('nList');
-  if(!list.length){
-    el.innerHTML='<div style="text-align:center;padding:56px 20px;color:var(--text-muted);font-size:13.5px;"><div style="font-size:36px;margin-bottom:10px;">🎉</div>Nothing here!</div>';
-    return;
-  }
-  el.innerHTML=list.map(n=>`
-    <div class="n-item${n.read?'':' unread'}">
-      <div class="n-icon" style="background:${n.soft}">${n.icon}</div>
-      <div class="n-body">
-        <div class="n-title">${n.title}</div>
-        <div class="n-sub">${n.sub}</div>
-        <div class="n-actions">
-          <a class="btn btn-outline btn-sm" href="./calendar.html">View calendar</a>
-          <button class="btn btn-ghost btn-sm" onclick="dismiss('${n.rk}')">Dismiss</button>
+    <div class="form-stack">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input id="name" class="form-input" type="text" placeholder="Jane Doe" oninput="ce('name','nameErr')">
+        </div>
+        <span class="form-error" id="nameErr">Please enter your full name.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">University email</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input id="email" class="form-input" type="email" placeholder="you@university.edu" oninput="ce('email','emailErr')">
+        </div>
+        <span class="form-error" id="emailErr">Please enter a valid email address.</span>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="password" class="form-input" type="password" placeholder="Min. 6 characters" oninput="ce('password','passErr')">
+          </div>
+          <span class="form-error" id="passErr">Password must be at least 6 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="confirm" class="form-input" type="password" placeholder="Repeat" oninput="ce('confirm','confirmErr')">
+          </div>
+          <span class="form-error" id="confirmErr">Passwords do not match.</span>
         </div>
       </div>
-      <div class="n-right">
-        <span class="n-time">${timeLabel(n.diff)}</span>
-        ${!n.read?'<div class="n-dot"></div>':''}
-      </div>
-    </div>`).join('');
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" onclick="createAccount()">Create account →</button>
+    <p class="terms">By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+    <p class="auth-footer-link" style="margin-top:16px;">Already have an account? <a href="./index.html">Sign in.</a></p>
+  </div>
+</div>
+<div class="toast success" id="toast">✅ Account created! Redirecting…</div>
+<script>
+function ce(i,e){ document.getElementById(i).classList.remove('error'); document.getElementById(e).classList.remove('show'); }
+function flag(i,e){ document.getElementById(i).classList.add('error'); document.getElementById(e).classList.add('show'); }
+function createAccount(){
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const pass=document.getElementById('password').value;
+  const conf=document.getElementById('confirm').value;
+  ['name','email','password','confirm'].forEach(id=>document.getElementById(id).classList.remove('error'));
+  ['nameErr','emailErr','passErr','confirmErr'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  let ok=true;
+  if(!name)               { flag('name','nameErr'); ok=false; }
+  if(!email||!email.includes('@')){ flag('email','emailErr'); ok=false; }
+  if(!pass||pass.length<6){ flag('password','passErr'); ok=false; }
+  if(pass!==conf)         { flag('confirm','confirmErr'); ok=false; }
+  if(!ok) return;
+  localStorage.setItem('cp_user_name', name.split(' ')[0]);
+  localStorage.setItem('cp_password', pass);
+  localStorage.setItem('cp_logged_in', '1');
+  // Seed data
+  if(JSON.parse(localStorage.getItem('cp_assignments')||'[]').length===0){
+    const today=new Date();
+    const d=o=>{const x=new Date(today);x.setDate(x.getDate()+o);return x.toISOString().split('T')[0];};
+    localStorage.setItem('cp_assignments',JSON.stringify([
+      {id:1,title:'Research Paper',course:'psych',dueDate:d(6),reminder:'2',priority:'high',estHours:'4',notes:'',completed:false,createdAt:d(-5)},
+      {id:2,title:'Group Project',course:'cs',dueDate:d(4),reminder:'2',priority:'high',estHours:'6',notes:'',completed:false,createdAt:d(-5)},
+      {id:4,title:'Coding Project',course:'prog',dueDate:d(12),reminder:'3',priority:'medium',estHours:'5',notes:'',completed:false,createdAt:d(-2)},
+    ]));
+  }
+  const t=document.getElementById('toast'); t.classList.add('show');
+  setTimeout(()=>window.location.href='./dashboard.html',900);
 }
-
-function dismiss(rk){ const r=getRead(); if(!r.includes(rk))r.push(rk); setRead(r); render(); }
-function markAllRead(){ const r=getRead(); buildNotifs().forEach(n=>{if(!r.includes(n.rk))r.push(n.rk);}); setRead(r); render(); showToast('All notifications marked as read'); }
-
-render();
+document.addEventListener('keydown',e=>{if(e.key==='Enter')createAccount();});
 </script>
 </body>
 </html>
