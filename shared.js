@@ -10,13 +10,13 @@ const COURSES = {
 
 // ── Sign out ─────────────────────────────────────────────────
 function signOut() {
-  sessionStorage.removeItem('cp_logged_in');
+  localStorage.removeItem('cp_logged_in');
   window.location.replace('./index.html');
 }
 
 // ── Auth guard — call at top of every app page ───────────────
 function requireLogin() {
-  if (!sessionStorage.getItem('cp_logged_in')) {
+  if (!localStorage.getItem('cp_logged_in')) {
     window.location.replace('./index.html');
   }
 }
